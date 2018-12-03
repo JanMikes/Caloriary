@@ -2,6 +2,7 @@
 
 namespace Caloriary\Domain;
 
+use Caloriary\Domain\Exception\AuthenticationFailed;
 use Caloriary\Domain\Value\ClearTextPassword;
 use Caloriary\Domain\Value\EmailAddress;
 use Caloriary\Domain\Value\PasswordHash;
@@ -37,6 +38,14 @@ final class User
 	public function passwordHash(): PasswordHash
 	{
 		return $this->passwordHash;
+	}
+
+
+	public function authenticate(ClearTextPassword $password) : void
+	{
+		if ($password->matches($this->passwordHash) === false) {
+			throw new AuthenticationFailed();
+		}
 	}
 
 

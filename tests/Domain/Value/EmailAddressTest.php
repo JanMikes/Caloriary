@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 class EmailAddressTest extends TestCase
 {
-
 	public function testFromString(): void
 	{
 		$address = EmailAddress::fromString('john@doe.com');
