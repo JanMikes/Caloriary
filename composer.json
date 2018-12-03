@@ -18,5 +18,15 @@
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Caloriary\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Caloriary\\Tests\\": "tests"
+        }
     }
 }
