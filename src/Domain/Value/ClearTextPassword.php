@@ -27,7 +27,15 @@ final class ClearTextPassword
 
 	public function makeHash(): PasswordHash
 	{
-		return new PasswordHash();
+		return PasswordHash::fromString(
+			password_hash($this->password, \PASSWORD_DEFAULT)
+		);
+	}
+
+
+	public function matches(PasswordHash $hash): bool
+	{
+		return password_verify($this->password, $hash->toString());
 	}
 
 

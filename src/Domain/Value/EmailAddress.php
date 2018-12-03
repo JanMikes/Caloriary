@@ -4,7 +4,9 @@ namespace Caloriary\Domain\Value;
 
 final class EmailAddress
 {
-	/** @var string */
+	/**
+	 * @var string
+	 */
 	private $mail;
 
 
