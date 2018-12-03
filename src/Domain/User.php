@@ -28,6 +28,18 @@ final class User
 	}
 
 
+	public function emailAddress(): EmailAddress
+	{
+		return $this->emailAddress;
+	}
+
+
+	public function passwordHash(): PasswordHash
+	{
+		return $this->passwordHash;
+	}
+
+
 	private function __construct(
 		EmailAddress $emailAddress,
 		PasswordHash $passwordHash
