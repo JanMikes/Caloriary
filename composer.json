@@ -9,6 +9,12 @@
             "email": "j.mikes@me.com"
         }
     ],
-    "minimum-stability": "stable",
-    "require": {}
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.2",
+        "roave/security-advisories": "dev-master",
+        "brandembassy/slim-nette-extension": "^2.0"
+    }
+
 }
