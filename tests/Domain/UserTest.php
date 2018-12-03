@@ -1,6 +1,6 @@
 <?php declare (strict_types=1);
 
-namespace Caloriary\Tests\Domain\User;
+namespace Caloriary\Tests\Domain;
 
 use Caloriary\Domain\User;
 use Caloriary\Domain\Value\ClearTextPassword;
