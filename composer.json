@@ -1,0 +1,14 @@
+{
+    "name": "janmikes/caloriary",
+    "description": "REST API for the calories",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jan Mikeš",
+            "email": "j.mikes@me.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
