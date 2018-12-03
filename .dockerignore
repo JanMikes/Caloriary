@@ -1,0 +1,9 @@
+.git/
+.idea/
+
+.DS_Store
+.dockerignore
+.gitignore
+Dockerfile
+docker-compose.yml
+docker-compose.yml.dist
