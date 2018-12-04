@@ -4,7 +4,7 @@ use BrandEmbassy\Slim\SlimApplicationFactory;
 use Nette\DI\Container;
 
 /** @var Container $container */
-$container = require __DIR__ . '/../src/bootstrap.php';
+$container = require __DIR__ . '/../src/Application/bootstrap.php';
 
 /** @var SlimApplicationFactory $applicationFactory */
 $applicationFactory = $container->getByType(SlimApplicationFactory::class);
