@@ -21,6 +21,11 @@ final class User
 	 */
 	private $passwordHash;
 
+	/**
+	 * @var int
+	 */
+	private $dailyLimit = 0;
+
 
 	public static function register(
 		EmailAddress $emailAddress,
@@ -53,6 +58,20 @@ final class User
 		if ($password->matches($this->passwordHash) === false) {
 			throw new AuthenticationFailed();
 		}
+	}
+
+
+	public function editByUser(User $user, int $dailyLimit): void
+	{
+		// @todo: Check if user is allowed to edit this user
+		$this->dailyLimit = $dailyLimit;
+	}
+
+
+	public function changePasswordByUser(User $user, ClearTextPassword $password): void
+	{
+		// @todo: Check if user is allowed to perform action
+		$this->passwordHash = $password->makeHash();
 	}
 
 
