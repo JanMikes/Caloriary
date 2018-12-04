@@ -4,6 +4,9 @@
                    https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
 
     <entity name="Caloriary\Authentication\User">
-
+        <id name="emailAddress" type="Caloriary\Authentication\Value\EmailAddress" />
+        <field name="passwordHash" type="Caloriary\Authentication\Value\PasswordHash" />
+        <field name="role" type="Caloriary\Authorization\Value\UserRole" />
+        <field name="dailyLimit" type="Caloriary\Calories\Value\DailyCaloriesLimit" />
     </entity>
 </doctrine-mapping>
