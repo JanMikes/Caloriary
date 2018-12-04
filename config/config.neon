@@ -13,6 +13,21 @@ slimApi:
 		settings:
 			removeDefaultHandlers: true
 
+dbal:
+	connection:
+		host: mysql
+		user: root
+		password:
+		dbname: caloriary
+
+orm.xml:
+	paths:
+		- %appdir%/../../mappings
+
+migrations:
+	directory: %appDir%/../../migrations
+	versionsOrganization: year_and_month
+
 services:
 	- Caloriary\Application\Handler\NotFoundHandler
 	- Caloriary\Application\Handler\NotAllowedHandler

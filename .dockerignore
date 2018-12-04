@@ -9,3 +9,5 @@ var/temp/
 .gitignore
 docker-compose.yml
 docker-compose.yml.dist
+
+/.docker/mysql-data

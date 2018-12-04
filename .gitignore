@@ -4,3 +4,5 @@
 !.gitkeep
 
 docker-compose.yml
+
+/.docker/mysql-data
