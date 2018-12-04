@@ -1524,12 +1524,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/JanMikes/orm.git",
-                "reference": "3a63b3ab08188b9034296147301a39c82a5f59dc"
+                "reference": "520aa66602c4bf7996b3778268b5b610f121a542"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/JanMikes/orm/zipball/3a63b3ab08188b9034296147301a39c82a5f59dc",
-                "reference": "3a63b3ab08188b9034296147301a39c82a5f59dc",
+                "url": "https://api.github.com/repos/JanMikes/orm/zipball/520aa66602c4bf7996b3778268b5b610f121a542",
+                "reference": "520aa66602c4bf7996b3778268b5b610f121a542",
                 "shasum": ""
             },
             "require": {
@@ -1613,7 +1613,7 @@
             "support": {
                 "source": "https://github.com/JanMikes/orm/tree/xml-mapping"
             },
-            "time": "2018-12-04T21:26:21+00:00"
+            "time": "2018-12-04T21:37:35+00:00"
         },
         {
             "name": "nikic/fast-route",
