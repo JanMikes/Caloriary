@@ -17,3 +17,11 @@ COPY . /application
 
 ## Self explaining composer install
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-ansi --no-scripts --no-progress --no-suggest
+
+COPY ./.docker/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
+## Install Xdebug extension + cleanup
+RUN pecl -q install xdebug \
+    && docker-php-ext-enable xdebug \
+    && apt-get clean \
+    && rm -rf /tmp/* /usr/local/lib/php/doc/* /var/cache/apt/*
