@@ -29,7 +29,7 @@ final class ClearTextPassword
 	{
 		$hash = password_hash($this->password, \PASSWORD_DEFAULT);
 
-		if (is_string($hash) === false) {
+		if (\is_string($hash) === false) {
 			throw new \RuntimeException('Failed to create password hash');
 		}
 

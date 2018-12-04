@@ -3,6 +3,8 @@
 namespace Caloriary\Domain;
 
 use Caloriary\Domain\Exception\AuthenticationFailed;
+use Caloriary\Domain\Exception\EmailAddressAlreadyRegistered;
+use Caloriary\Domain\ReadModel\IsEmailRegistered;
 use Caloriary\Domain\Value\ClearTextPassword;
 use Caloriary\Domain\Value\EmailAddress;
 use Caloriary\Domain\Value\PasswordHash;
@@ -22,9 +24,14 @@ final class User
 
 	public static function register(
 		EmailAddress $emailAddress,
-		ClearTextPassword $password
+		ClearTextPassword $password,
+		IsEmailRegistered $isEmailRegistered
 	): self
 	{
+		if ($isEmailRegistered->__invoke($emailAddress)) {
+			throw new EmailAddressAlreadyRegistered();
+		}
+
 		return new self($emailAddress, $password->makeHash());
 	}
 

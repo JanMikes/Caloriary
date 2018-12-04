@@ -3,21 +3,59 @@
 namespace Caloriary\Tests\Domain;
 
 use Caloriary\Domain\Exception\AuthenticationFailed;
+use Caloriary\Domain\Exception\EmailAddressAlreadyRegistered;
+use Caloriary\Domain\ReadModel\IsEmailRegistered;
 use Caloriary\Domain\User;
 use Caloriary\Domain\Value\ClearTextPassword;
 use Caloriary\Domain\Value\EmailAddress;
+use League\FactoryMuffin\FactoryMuffin;
 use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
 {
-	public function testRegister(): void
+	/**
+	 * @var FactoryMuffin
+	 */
+	protected static $fm;
+
+
+	public static function setUpBeforeClass(): void
 	{
+		parent::setUpBeforeClass();
+
+		static::$fm = new FactoryMuffin();
+		static::$fm->loadFactories(__DIR__ . '/../factories');
+	}
+
+
+	/**
+	 * @dataProvider registerProvider
+	 */
+	public function testRegister(bool $isRegistered): void
+	{
+		if ($isRegistered) {
+			$this->expectException(EmailAddressAlreadyRegistered::class);
+		}
+
+		$isEmailRegistered = \Mockery::mock(IsEmailRegistered::class);
+		$isEmailRegistered->shouldReceive('__invoke')->andReturn($isRegistered);
+
 		$user = User::register(
 			EmailAddress::fromString('john@doe.com'),
-			ClearTextPassword::fromString('password')
+			ClearTextPassword::fromString('password'),
+			$isEmailRegistered
 		);
 
 		$this->assertInstanceOf(User::class, $user);
+	}
+
+
+	public function registerProvider(): array
+	{
+		return [
+			[true],
+			[false],
+		];
 	}
 
 
@@ -26,13 +64,10 @@ class UserTest extends TestCase
 	 */
 	public function testAuthenticate(): void
 	{
-		$user = User::register(
-			EmailAddress::fromString('john@doe.com'),
-			ClearTextPassword::fromString('password')
-		);
+		$user = static::$fm->instance(User::class);
 
 		$user->authenticate(
-			ClearTextPassword::fromString('password')
+			ClearTextPassword::fromString('123')
 		);
 	}
 
@@ -41,10 +76,7 @@ class UserTest extends TestCase
 	{
 		$this->expectException(AuthenticationFailed::class);
 
-		$user = User::register(
-			EmailAddress::fromString('john@doe.com'),
-			ClearTextPassword::fromString('password')
-		);
+		$user = static::$fm->instance(User::class);
 
 		$user->authenticate(
 			ClearTextPassword::fromString('notMatchingPassword')
