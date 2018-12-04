@@ -31,7 +31,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Caloriary\\Tests\\": "tests"
+            "Tests\\Caloriary\\": "tests"
         }
     }
 }

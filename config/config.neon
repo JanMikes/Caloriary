@@ -7,68 +7,68 @@ slimApi:
 			removeDefaultHandlers: true
 
 services:
-	- Caloriary\Infrastructure\API\Handler\NotFoundHandler
-	- Caloriary\Infrastructure\API\Handler\NotAllowedHandler
-	- Caloriary\Infrastructure\API\Handler\ApiErrorHandler
-	- Caloriary\Infrastructure\API\Action\LoginAction
-	- Caloriary\Infrastructure\API\Action\ListUsersAction
-	- Caloriary\Infrastructure\API\Action\RegisterUserAction
-	- Caloriary\Infrastructure\API\Action\UserDetailAction
-	- Caloriary\Infrastructure\API\Action\EditUserAction
-	- Caloriary\Infrastructure\API\Action\DeleteUserAction
-	- Caloriary\Infrastructure\API\Action\ListEntriesAction
-	- Caloriary\Infrastructure\API\Action\AddEntryAction
-	- Caloriary\Infrastructure\API\Action\EntryDetailAction
-	- Caloriary\Infrastructure\API\Action\EditEntryAction
-	- Caloriary\Infrastructure\API\Action\DeleteEntryAction
+	- Caloriary\Application\Handler\NotFoundHandler
+	- Caloriary\Application\Handler\NotAllowedHandler
+	- Caloriary\Application\Handler\ApiErrorHandler
+	- Caloriary\Application\Action\LoginAction
+	- Caloriary\Application\Action\ListUsersAction
+	- Caloriary\Application\Action\RegisterUserAction
+	- Caloriary\Application\Action\UserDetailAction
+	- Caloriary\Application\Action\EditUserAction
+	- Caloriary\Application\Action\DeleteUserAction
+	- Caloriary\Application\Action\ListEntriesAction
+	- Caloriary\Application\Action\AddEntryAction
+	- Caloriary\Application\Action\EntryDetailAction
+	- Caloriary\Application\Action\EditEntryAction
+	- Caloriary\Application\Action\DeleteEntryAction
 
 parameters:
 	api:
 		handlers:
-			notFound: Caloriary\Infrastructure\API\Handler\NotFoundHandler
-			notAllowed: Caloriary\Infrastructure\API\Handler\NotAllowedHandler
-			error: Caloriary\Infrastructure\API\Handler\ApiErrorHandler
+			notFound: Caloriary\Application\Handler\NotFoundHandler
+			notAllowed: Caloriary\Application\Handler\NotAllowedHandler
+			error: Caloriary\Application\Handler\ApiErrorHandler
 
 		routes:
 			api:
 				'1.0':
 					/login:
 						post:
-							service: Caloriary\Infrastructure\API\Action\LoginAction
+							service: Caloriary\Application\Action\LoginAction
 
 					/users:
 						get:
-							service: Caloriary\Infrastructure\API\Action\ListUsersAction
+							service: Caloriary\Application\Action\ListUsersAction
 
 						post:
-							service: Caloriary\Infrastructure\API\Action\RegisterUserAction
+							service: Caloriary\Application\Action\RegisterUserAction
 
 					"/users/{userId}":
 						get:
-							service: Caloriary\Infrastructure\API\Action\UserDetailAction
+							service: Caloriary\Application\Action\UserDetailAction
 
 						put:
-							service: Caloriary\Infrastructure\API\Action\EditUserAction
+							service: Caloriary\Application\Action\EditUserAction
 
 						delete:
-							service: Caloriary\Infrastructure\API\Action\DeleteUserAction
+							service: Caloriary\Application\Action\DeleteUserAction
 
 					/entries:
 						get:
-							service: Caloriary\Infrastructure\API\Action\ListEntriesAction
+							service: Caloriary\Application\Action\ListEntriesAction
 
 						post:
-							service: Caloriary\Infrastructure\API\Action\AddEntryAction
+							service: Caloriary\Application\Action\AddEntryAction
 
 					"/entries/{entryId}":
 						get:
-							service: Caloriary\Infrastructure\API\Action\EntryDetailAction
+							service: Caloriary\Application\Action\EntryDetailAction
 
 						put:
-							service: Caloriary\Infrastructure\API\Action\EditEntryAction
+							service: Caloriary\Application\Action\EditEntryAction
 
 						delete:
-							service: Caloriary\Infrastructure\API\Action\DeleteEntryAction
+							service: Caloriary\Application\Action\DeleteEntryAction
 
 
 # Will we need this?:

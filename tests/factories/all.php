@@ -1,8 +1,8 @@
 <?php
 
-use Caloriary\Domain\User;
-use Caloriary\Domain\Value\ClearTextPassword;
-use Caloriary\Domain\Value\EmailAddress;
+use Caloriary\Authentication\User;
+use Caloriary\Authentication\Value\ClearTextPassword;
+use Caloriary\Authentication\Value\EmailAddress;
 use League\FactoryMuffin\FactoryMuffin;
 
 /** @var FactoryMuffin $fm */
