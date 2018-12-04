@@ -2,3 +2,5 @@
 /var/
 
 !.gitkeep
+
+docker-compose.yml

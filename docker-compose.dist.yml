@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/application:cached
+      - ./.docker/nginx/site.conf:/etc/nginx/conf.d/default.conf
+      - ./var/log/nginx:/var/log/nginx:delegated
+
+  php:
+    build:
+      context: .
+    image: caloriary:latest
+    volumes:
+      - .:/application:cached
+      - ./.docker/php/log.conf:/usr/local/etc/php-fpm.d/99-log.conf:cached
