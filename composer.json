@@ -16,7 +16,8 @@
         "roave/security-advisories": "dev-master",
         "brandembassy/slim-nette-extension": "^2.0",
         "tracy/tracy": "^2.5",
-        "consistence/consistence": "^1.1"
+        "consistence/consistence": "^1.1",
+        "ramsey/uuid": "^3.8"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5",
