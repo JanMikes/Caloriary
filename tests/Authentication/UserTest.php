@@ -46,9 +46,12 @@ class UserTest extends TestCase
 		$isEmailRegistered = \Mockery::mock(IsEmailRegistered::class);
 		$isEmailRegistered->shouldReceive('__invoke')->andReturn($isRegistered);
 
+		$clearTextPassword = \Mockery::mock(ClearTextPassword::class);
+		$clearTextPassword->shouldIgnoreMissing();
+
 		$user = User::register(
-			EmailAddress::fromString('john@doe.com'),
-			ClearTextPassword::fromString('password'),
+			\Mockery::mock(EmailAddress::class),
+			$clearTextPassword,
 			$isEmailRegistered
 		);
 

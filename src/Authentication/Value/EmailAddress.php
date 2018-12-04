@@ -2,7 +2,7 @@
 
 namespace Caloriary\Authentication\Value;
 
-final class EmailAddress
+class EmailAddress
 {
 	/**
 	 * @var string

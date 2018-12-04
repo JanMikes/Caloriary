@@ -2,7 +2,7 @@
 
 namespace Caloriary\Authentication\Value;
 
-final class PasswordHash
+class PasswordHash
 {
 	/**
 	 * @var string

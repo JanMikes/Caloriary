@@ -2,7 +2,7 @@
 
 namespace Caloriary\Authentication\Value;
 
-final class ClearTextPassword
+class ClearTextPassword
 {
 	/**
 	 * @var string
