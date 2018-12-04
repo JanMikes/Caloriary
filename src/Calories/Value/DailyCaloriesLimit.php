@@ -26,6 +26,12 @@ class DailyCaloriesLimit
 	}
 
 
+	public function toInteger(): int
+	{
+		return $this->limit;
+	}
+
+
 	private function __construct()
 	{
 	}

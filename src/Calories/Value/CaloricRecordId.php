@@ -34,6 +34,12 @@ class CaloricRecordId
 	}
 
 
+	public function toString(): string
+	{
+		return $this->uuid->toString();
+	}
+
+
 	private function __construct()
 	{
 	}

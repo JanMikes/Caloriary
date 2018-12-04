@@ -26,6 +26,12 @@ class Calories
 	}
 
 
+	public function toInteger(): int
+	{
+		return $this->calories;
+	}
+
+
 	private function __construct()
 	{
 	}
