@@ -1,6 +1,6 @@
 extensions:
 	slimApi: BrandEmbassy\Slim\DI\SlimApiExtension
-	console: Contributte\Console\DI\ConsoleExtension
+	console: Contributte\Console\DI\ConsoleExtension(%consoleMode%)
 	dbal: Nettrine\DBAL\DI\DbalExtension
 	orm: Nettrine\ORM\DI\OrmExtension
 	orm.cache: Nettrine\ORM\DI\OrmCacheExtension
