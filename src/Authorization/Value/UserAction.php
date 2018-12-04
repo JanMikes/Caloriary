@@ -4,7 +4,7 @@ namespace Caloriary\Authorization\Value;
 
 use Consistence\Enum\Enum;
 
-final class ActionResource extends Enum
+final class UserAction extends Enum
 {
 	public const EDIT_USER = 'edit_user';
 

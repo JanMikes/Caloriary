@@ -8,9 +8,15 @@ use Caloriary\Authentication\ReadModel\IsEmailRegistered;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authentication\Value\PasswordHash;
+use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
+use Caloriary\Authorization\Exception\RestrictedAccess;
+use Caloriary\Authorization\ReadModel\HasRoleAccessToResource;
+use Caloriary\Authorization\ReadModel\IsUserOwnerOfResource;
+use Caloriary\Authorization\Resource;
+use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Authorization\Value\UserRole;
 
-final class User
+final class User implements Resource
 {
 	/**
 	 * @var EmailAddress
@@ -67,24 +73,51 @@ final class User
 	}
 
 
-	public function editByUser(User $user, int $dailyLimit): void
+	public function editUser(
+		User $user,
+		int $dailyLimit,
+		CanUserPerformActionOnResource $canUserPerformActionOnResource
+	): void
 	{
-		// @todo: Check if user is allowed to edit this user
-		$this->dailyLimit = $dailyLimit;
+		$action = UserAction::get(UserAction::EDIT_USER);
+
+		$this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
+
+		$user->dailyLimit = $dailyLimit;
 	}
 
 
-	public function changePasswordByUser(User $user, ClearTextPassword $password): void
+	public function changeUserPassword(
+		User $user,
+		ClearTextPassword $password,
+		CanUserPerformActionOnResource $canUserPerformActionOnResource
+	): void
 	{
-		// @todo: Check if user is allowed to perform action
-		$this->passwordHash = $password->makeHash();
+		$action = UserAction::get(UserAction::CHANGE_USER_PASSWORD);
+
+		$this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
+
+		$user->passwordHash = $password->makeHash();
 	}
 
 
-	public function changeRoleUser(User $user, UserRole $role): void
+	public function changeUserRole(
+		User $user,
+		UserRole $role,
+		CanUserPerformActionOnResource $canUserPerformActionOnResource
+	): void
 	{
-		// @todo: Check if user is allowed to perform action
+		$action = UserAction::get(UserAction::CHANGE_USER_ROLE);
+
+		$this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
+
 		$this->role = $role;
+	}
+
+
+	public function ownedBy(): User
+	{
+		return $this;
 	}
 
 
@@ -96,5 +129,17 @@ final class User
 		$this->emailAddress = $emailAddress;
 		$this->passwordHash = $passwordHash;
 		$this->role = UserRole::get(UserRole::USER);
+	}
+
+
+	private function assertActionCanBePerformedOnResource(
+		CanUserPerformActionOnResource $canUserPerformActionOnResource,
+		UserAction $action,
+		Resource $resource
+	): void
+	{
+		if (! $canUserPerformActionOnResource->__invoke($this, $action, $resource)) {
+			throw new RestrictedAccess();
+		}
 	}
 }
