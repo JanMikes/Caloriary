@@ -5,6 +5,7 @@ extensions:
 	orm: Nettrine\ORM\DI\OrmExtension
 	orm.cache: Nettrine\ORM\DI\OrmCacheExtension
 	orm.console: Nettrine\ORM\DI\OrmConsoleExtension
+	orm.xml: Nettrine\ORM\DI\OrmXmlExtension
 	migrations: Nettrine\Migrations\DI\MigrationsExtension
 
 slimApi:
