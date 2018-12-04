@@ -15,7 +15,7 @@ final class ClearTextPassword
 	 */
 	public static function fromString(string $string): self
 	{
-		if ('' === $string) {
+		if (trim($string) === '') {
 			throw new \InvalidArgumentException('An empty password is not acceptable');
 		}
 		$instance = new self();
