@@ -10,8 +10,6 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authentication\Value\PasswordHash;
 use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
-use Caloriary\Authorization\ReadModel\HasRoleAccessToResource;
-use Caloriary\Authorization\ReadModel\IsUserOwnerOfResource;
 use Caloriary\Authorization\Resource;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Authorization\Value\UserRole;
@@ -29,7 +27,7 @@ final class User implements Resource
 	private $passwordHash;
 
 	/**
-	 * @var \Caloriary\Authorization\Value\UserRole
+	 * @var UserRole
 	 */
 	private $role;
 

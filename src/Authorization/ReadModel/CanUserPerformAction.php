@@ -5,7 +5,7 @@ namespace Caloriary\Authorization\ReadModel;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Authorization\Value\UserRole;
 
-interface HasRoleAccessToResource
+interface CanUserPerformAction
 {
 	public function __invoke(UserRole $role, UserAction $resource): bool;
 }
