@@ -13,6 +13,7 @@ use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Resource;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Authorization\Value\UserRole;
+use Caloriary\Calories\Value\DailyCaloriesLimit;
 
 class User implements Resource
 {
@@ -32,9 +33,9 @@ class User implements Resource
 	private $role;
 
 	/**
-	 * @var int
+	 * @var DailyCaloriesLimit
 	 */
-	private $dailyLimit = 0;
+	private $dailyLimit;
 
 
 	public static function register(
@@ -73,7 +74,7 @@ class User implements Resource
 
 	public function editUser(
 		User $user,
-		int $dailyLimit,
+		DailyCaloriesLimit $dailyLimit,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource
 	): void
 	{
@@ -119,7 +120,7 @@ class User implements Resource
 	}
 
 
-	public function dailyLimit(): int
+	public function dailyLimit(): DailyCaloriesLimit
 	{
 		return $this->dailyLimit;
 	}

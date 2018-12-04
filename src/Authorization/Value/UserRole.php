@@ -4,7 +4,7 @@ namespace Caloriary\Authorization\Value;
 
 use Consistence\Enum\Enum;
 
-final class UserRole extends Enum
+class UserRole extends Enum
 {
 	public const USER = 'user';
 

@@ -11,6 +11,7 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Value\UserRole;
+use Caloriary\Calories\Value\DailyCaloriesLimit;
 use League\FactoryMuffin\FactoryMuffin;
 use PHPUnit\Framework\TestCase;
 use Tests\Caloriary\AuthorizationMockFactoryMethods;
@@ -81,6 +82,9 @@ class UserTest extends TestCase
 	}
 
 
+	/**
+	 * @doesNotPerformAssertions
+	 */
 	public function testEditUser(): void
 	{
 		/** @var User $user1 */
@@ -88,15 +92,11 @@ class UserTest extends TestCase
 		/** @var User $user2 */
 		$user2 = static::$fm->instance(User::class);
 
-		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(true);
-
 		$user1->editUser(
 			$user2,
-			10,
-			$canPerformActionOnResource
+			\Mockery::mock(DailyCaloriesLimit::class),
+			$this->createCanPerformActionOnResourceMock(true)
 		);
-
-		$this->assertSame(10, $user2->dailyLimit());
 	}
 
 
@@ -109,12 +109,10 @@ class UserTest extends TestCase
 		/** @var User $user2 */
 		$user2 = static::$fm->instance(User::class);
 
-		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(false);
-
 		$user1->editUser(
 			$user2,
-			10,
-			$canPerformActionOnResource
+			\Mockery::mock(DailyCaloriesLimit::class),
+			$this->createCanPerformActionOnResourceMock(false)
 		);
 	}
 
@@ -129,12 +127,10 @@ class UserTest extends TestCase
 		/** @var User $user2 */
 		$user2 = static::$fm->instance(User::class);
 
-		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(true);
-
 		$user1->changeUserPassword(
 			$user2,
 			ClearTextPassword::fromString('abcd'),
-			$canPerformActionOnResource
+			$this->createCanPerformActionOnResourceMock(true)
 		);
 
 		$user2->authenticate(
@@ -152,12 +148,10 @@ class UserTest extends TestCase
 		/** @var User $user2 */
 		$user2 = static::$fm->instance(User::class);
 
-		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(false);
-
 		$user1->changeUserPassword(
 			$user2,
-			ClearTextPassword::fromString('abcd'),
-			$canPerformActionOnResource
+			\Mockery::mock(ClearTextPassword::class),
+			$this->createCanPerformActionOnResourceMock(false)
 		);
 	}
 
@@ -172,12 +166,10 @@ class UserTest extends TestCase
 		/** @var User $user2 */
 		$user2 = static::$fm->instance(User::class);
 
-		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(true);
-
 		$user1->changeUserRole(
 			$user2,
-			UserRole::get(UserRole::ADMIN),
-			$canPerformActionOnResource
+			\Mockery::mock(UserRole::class),
+			$this->createCanPerformActionOnResourceMock(true)
 		);
 	}
 
@@ -191,12 +183,10 @@ class UserTest extends TestCase
 		/** @var User $user2 */
 		$user2 = static::$fm->instance(User::class);
 
-		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(false);
-
 		$user1->changeUserRole(
 			$user2,
-			UserRole::get(UserRole::ADMIN),
-			$canPerformActionOnResource
+			\Mockery::mock(UserRole::class),
+			$this->createCanPerformActionOnResourceMock(false)
 		);
 	}
 }
