@@ -3,9 +3,11 @@
 use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
+use Caloriary\Authorization\Value\UserRole;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Calories\Value\Calories;
+use Caloriary\Calories\Value\DailyCaloriesLimit;
 use Caloriary\Calories\Value\MealDescription;
 use League\FactoryMuffin\FactoryMuffin;
 use Ramsey\Uuid\Uuid;
@@ -21,6 +23,14 @@ $fm->define(User::class)->setMaker(function() {
 	$property = new \ReflectionProperty(User::class, 'passwordHash');
 	$property->setAccessible(true);
 	$property->setValue($user, ClearTextPassword::fromString('123')->makeHash());
+
+	$property = new \ReflectionProperty(User::class, 'role');
+	$property->setAccessible(true);
+	$property->setValue($user, UserRole::get(UserRole::USER));
+
+	$property = new \ReflectionProperty(User::class, 'dailyLimit');
+	$property->setAccessible(true);
+	$property->setValue($user, DailyCaloriesLimit::createUnlimited());
 
 	return $user;
 });
