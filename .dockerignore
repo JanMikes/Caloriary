@@ -1,6 +1,9 @@
 .git/
 .idea/
 
+var/log/
+var/temp/
+
 .DS_Store
 .dockerignore
 .gitignore

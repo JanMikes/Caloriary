@@ -1,0 +1,29 @@
+extensions:
+	slimApi: BrandEmbassy\Slim\DI\SlimApiExtension
+
+slimApi:
+	slimConfiguration:
+		settings:
+			removeDefaultHandlers: true
+
+services:
+	- Caloriary\Infrastructure\API\Handler\NotFoundHandler
+	- Caloriary\Infrastructure\API\Handler\NotAllowedHandler
+	- Caloriary\Infrastructure\API\Handler\ApiErrorHandler
+
+parameters:
+	api:
+		handlers:
+			notFound: Caloriary\Infrastructure\API\Handler\NotFoundHandler
+			notAllowed: Caloriary\Infrastructure\API\Handler\NotAllowedHandler
+			error: Caloriary\Infrastructure\API\Handler\ApiErrorHandler
+
+		routes:
+			api:
+				1.0:
+					/login: []
+					/users: []
+					"/users/{userId}": []
+					/entries: []
+					"/entries/{entryId}": []
+					"/users/{userId}/entries": []
