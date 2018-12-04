@@ -134,6 +134,7 @@ class User implements Resource
 		$this->emailAddress = $emailAddress;
 		$this->passwordHash = $passwordHash;
 		$this->role = UserRole::get(UserRole::USER);
+		$this->dailyLimit = DailyCaloriesLimit::createUnlimited();
 	}
 
 

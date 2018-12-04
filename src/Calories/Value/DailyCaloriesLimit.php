@@ -26,6 +26,12 @@ class DailyCaloriesLimit
 	}
 
 
+	public static function createUnlimited(): self
+	{
+		return self::fromInteger(0);
+	}
+
+
 	public function toInteger(): int
 	{
 		return $this->limit;
