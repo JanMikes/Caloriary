@@ -6,7 +6,7 @@ use Ramsey\Uuid\Exception\InvalidUuidStringException;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-final class CaloricRecordId
+class CaloricRecordId
 {
 	/**
 	 * @var UuidInterface

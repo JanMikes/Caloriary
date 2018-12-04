@@ -12,7 +12,7 @@ use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 
-final class CaloricRecord implements Resource
+class CaloricRecord implements Resource
 {
 	/**
 	 * @var CaloricRecordId

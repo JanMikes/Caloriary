@@ -2,7 +2,7 @@
 
 namespace Caloriary\Calories\Value;
 
-final class MealDescription
+class MealDescription
 {
 	private $text;
 

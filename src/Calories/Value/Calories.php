@@ -2,7 +2,7 @@
 
 namespace Caloriary\Calories\Value;
 
-final class Calories
+class Calories
 {
 	/**
 	 * @var int

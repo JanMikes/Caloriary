@@ -14,7 +14,7 @@ use Caloriary\Authorization\Resource;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Authorization\Value\UserRole;
 
-final class User implements Resource
+class User implements Resource
 {
 	/**
 	 * @var EmailAddress

@@ -13,9 +13,12 @@ use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Value\UserRole;
 use League\FactoryMuffin\FactoryMuffin;
 use PHPUnit\Framework\TestCase;
+use Tests\Caloriary\AuthorizationMockFactoryMethods;
 
 class UserTest extends TestCase
 {
+	use AuthorizationMockFactoryMethods;
+
 	/**
 	 * @var FactoryMuffin
 	 */
@@ -192,14 +195,5 @@ class UserTest extends TestCase
 			UserRole::get(UserRole::ADMIN),
 			$canPerformActionOnResource
 		);
-	}
-
-
-	private function createCanPerformActionOnResourceMock(bool $return): CanUserPerformActionOnResource
-	{
-		$canPerformActionOnResource = \Mockery::mock(CanUserPerformActionOnResource::class);
-		$canPerformActionOnResource->shouldReceive('__invoke')->andReturn($return);
-
-		return $canPerformActionOnResource;
 	}
 }
