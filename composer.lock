@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ff96cf6383867866ba456374da480794",
+    "content-hash": "d8ed2049ffeb4667d2eb3ac901daa5b1",
     "packages": [
         {
             "name": "brandembassy/slim-nette-extension",
@@ -44,6 +44,64 @@
                 "MIT"
             ],
             "time": "2018-08-21T11:53:12+00:00"
+        },
+        {
+            "name": "consistence/consistence",
+            "version": "1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/consistence/consistence.git",
+                "reference": "802a1150a754b908be0b28a2db8180a64bb70a08"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/consistence/consistence/zipball/802a1150a754b908be0b28a2db8180a64bb70a08",
+                "reference": "802a1150a754b908be0b28a2db8180a64bb70a08",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~7.0"
+            },
+            "require-dev": {
+                "consistence/coding-standard": "2.4",
+                "jakub-onderka/php-console-highlighter": "0.3.2",
+                "jakub-onderka/php-parallel-lint": "1.0",
+                "phing/phing": "2.16.1",
+                "phpunit/phpunit": "6.5.12"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Consistence\\": [
+                        "src"
+                    ]
+                },
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Vašek Purchart",
+                    "email": "me@vasekpurchart.cz",
+                    "homepage": "http://vasekpurchart.cz"
+                }
+            ],
+            "description": "Consistence - consistent approach and additions to PHP's functionality",
+            "keywords": [
+                "array",
+                "check",
+                "enum",
+                "format",
+                "strict",
+                "time",
+                "type"
+            ],
+            "time": "2018-09-05T08:55:19+00:00"
         },
         {
             "name": "container-interop/container-interop",
