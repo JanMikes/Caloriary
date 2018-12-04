@@ -2,10 +2,10 @@
 
 namespace Caloriary\Authorization\ReadModel;
 
+use Caloriary\Authentication\User;
 use Caloriary\Authorization\Value\UserAction;
-use Caloriary\Authorization\Value\UserRole;
 
 interface CanUserPerformAction
 {
-	public function __invoke(UserRole $role, UserAction $resource): bool;
+	public function __invoke(User $role, UserAction $action): bool;
 }
