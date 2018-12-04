@@ -119,6 +119,12 @@ final class User implements Resource
 	}
 
 
+	public function dailyLimit(): int
+	{
+		return $this->dailyLimit;
+	}
+
+
 	private function __construct(
 		EmailAddress $emailAddress,
 		PasswordHash $passwordHash

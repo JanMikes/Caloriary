@@ -8,6 +8,9 @@ use Caloriary\Authentication\ReadModel\IsEmailRegistered;
 use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
+use Caloriary\Authorization\Exception\RestrictedAccess;
+use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
+use Caloriary\Authorization\Value\UserRole;
 use League\FactoryMuffin\FactoryMuffin;
 use PHPUnit\Framework\TestCase;
 
@@ -59,27 +62,144 @@ class UserTest extends TestCase
 	}
 
 
-	/**
-	 * @doesNotPerformAssertions
-	 */
-	public function testAuthenticate(): void
-	{
-		$user = static::$fm->instance(User::class);
-
-		$user->authenticate(
-			ClearTextPassword::fromString('123')
-		);
-	}
-
-
 	public function testAuthenticateFails(): void
 	{
 		$this->expectException(AuthenticationFailed::class);
 
+		/** @var User $user */
 		$user = static::$fm->instance(User::class);
 
 		$user->authenticate(
 			ClearTextPassword::fromString('notMatchingPassword')
 		);
+	}
+
+
+	public function testEditUser(): void
+	{
+		/** @var User $user1 */
+		$user1 = static::$fm->instance(User::class);
+		/** @var User $user2 */
+		$user2 = static::$fm->instance(User::class);
+
+		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(true);
+
+		$user1->editUser(
+			$user2,
+			10,
+			$canPerformActionOnResource
+		);
+
+		$this->assertSame(10, $user2->dailyLimit());
+	}
+
+
+	public function testEditUserShouldThrowExceptionWhenUnauthorized(): void
+	{
+		$this->expectException(RestrictedAccess::class);
+
+		/** @var User $user1 */
+		$user1 = static::$fm->instance(User::class);
+		/** @var User $user2 */
+		$user2 = static::$fm->instance(User::class);
+
+		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(false);
+
+		$user1->editUser(
+			$user2,
+			10,
+			$canPerformActionOnResource
+		);
+	}
+
+
+	/**
+	 * @doesNotPerformAssertions
+	 */
+	public function testChangeUserPassword(): void
+	{
+		/** @var User $user1 */
+		$user1 = static::$fm->instance(User::class);
+		/** @var User $user2 */
+		$user2 = static::$fm->instance(User::class);
+
+		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(true);
+
+		$user1->changeUserPassword(
+			$user2,
+			ClearTextPassword::fromString('abcd'),
+			$canPerformActionOnResource
+		);
+
+		$user2->authenticate(
+			ClearTextPassword::fromString('abcd')
+		);
+	}
+
+
+	public function testChangeUserPasswordShouldThrowExceptionWhenUnauthorized(): void
+	{
+		$this->expectException(RestrictedAccess::class);
+
+		/** @var User $user1 */
+		$user1 = static::$fm->instance(User::class);
+		/** @var User $user2 */
+		$user2 = static::$fm->instance(User::class);
+
+		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(false);
+
+		$user1->changeUserPassword(
+			$user2,
+			ClearTextPassword::fromString('abcd'),
+			$canPerformActionOnResource
+		);
+	}
+
+
+	/**
+	 * @doesNotPerformAssertions
+	 */
+	public function testChangeUserRole(): void
+	{
+		/** @var User $user1 */
+		$user1 = static::$fm->instance(User::class);
+		/** @var User $user2 */
+		$user2 = static::$fm->instance(User::class);
+
+		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(true);
+
+		$user1->changeUserRole(
+			$user2,
+			UserRole::get(UserRole::ADMIN),
+			$canPerformActionOnResource
+		);
+	}
+
+
+	public function testChangeUserRoleShouldThrowExceptionWhenUnauthorized(): void
+	{
+		$this->expectException(RestrictedAccess::class);
+
+		/** @var User $user1 */
+		$user1 = static::$fm->instance(User::class);
+		/** @var User $user2 */
+		$user2 = static::$fm->instance(User::class);
+
+		$canPerformActionOnResource = $this->createCanPerformActionOnResourceMock(false);
+
+		$user1->changeUserRole(
+			$user2,
+			UserRole::get(UserRole::ADMIN),
+			$canPerformActionOnResource
+		);
+	}
+
+
+	private function createCanPerformActionOnResourceMock(bool $return): CanUserPerformActionOnResource
+	{
+		$canPerformActionOnResource = \Mockery::mock(CanUserPerformActionOnResource::class);
+		$canPerformActionOnResource->shouldReceive('__invoke')->andReturn($return);
+
+		return $canPerformActionOnResource;
 	}
 }
