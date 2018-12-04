@@ -91,6 +91,30 @@ final class CaloricRecord implements Resource
 	}
 
 
+	public function id(): CaloricRecordId
+	{
+		return $this->id;
+	}
+
+
+	public function calories(): Calories
+	{
+		return $this->calories;
+	}
+
+
+	public function ateAt(): \DateTimeImmutable
+	{
+		return $this->ateAt;
+	}
+
+
+	public function text(): MealDescription
+	{
+		return $this->text;
+	}
+
+
 	private function __construct(
 		CaloricRecordId $id,
 		User $user,
