@@ -19,10 +19,32 @@ dbal:
 		user: root
 		password:
 		dbname: caloriary
+		types:
+			Caloriary\Authentication\Value\EmailAddress:
+				class: Caloriary\Infrastructure\Authentication\DBAL\Type\EmailAddressType
+				commented: true
+			Caloriary\Authentication\Value\PasswordHash:
+				class: Caloriary\Infrastructure\Authentication\DBAL\Type\PasswordHashType
+				commented: true
+			Caloriary\Authorization\Value\UserRole:
+				class: Caloriary\Infrastructure\Authorization\DBAL\Type\UserRoleType
+				commented: true
+			Caloriary\Calories\Value\CaloricRecordId:
+				class: Caloriary\Infrastructure\Calories\DBAL\Type\CaloricRecordIdType
+				commented: true
+			Caloriary\Calories\Value\Calories:
+				class: Caloriary\Infrastructure\Calories\DBAL\Type\CaloriesType
+				commented: true
+			Caloriary\Calories\Value\DailyCaloriesLimit:
+				class: Caloriary\Infrastructure\Calories\DBAL\Type\DailyCaloriesLimitType
+				commented: true
+			Caloriary\Calories\Value\MealDescription:
+				class: Caloriary\Infrastructure\Calories\DBAL\Type\MealDescriptionType
+				commented: true
 
 orm.xml:
 	paths:
-		- %appdir%/../../mappings
+		- %appDir%/../../mappings
 
 migrations:
 	directory: %appDir%/../../migrations
