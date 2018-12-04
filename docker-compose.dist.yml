@@ -16,4 +16,6 @@ services:
     image: caloriary:latest
     volumes:
       - .:/application:cached
-      - ./.docker/php/log.conf:/usr/local/etc/php-fpm.d/99-log.conf:cached
+    environment:
+      XDEBUG_CONFIG: "remote_host=host.docker.internal"
+      PHP_IDE_CONFIG: "serverName=caloriary"
