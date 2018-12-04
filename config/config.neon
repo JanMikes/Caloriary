@@ -10,6 +10,17 @@ services:
 	- Caloriary\Infrastructure\API\Handler\NotFoundHandler
 	- Caloriary\Infrastructure\API\Handler\NotAllowedHandler
 	- Caloriary\Infrastructure\API\Handler\ApiErrorHandler
+	- Caloriary\Infrastructure\API\Action\LoginAction
+	- Caloriary\Infrastructure\API\Action\ListUsersAction
+	- Caloriary\Infrastructure\API\Action\RegisterUserAction
+	- Caloriary\Infrastructure\API\Action\UserDetailAction
+	- Caloriary\Infrastructure\API\Action\EditUserAction
+	- Caloriary\Infrastructure\API\Action\DeleteUserAction
+	- Caloriary\Infrastructure\API\Action\ListEntriesAction
+	- Caloriary\Infrastructure\API\Action\AddEntryAction
+	- Caloriary\Infrastructure\API\Action\EntryDetailAction
+	- Caloriary\Infrastructure\API\Action\EditEntryAction
+	- Caloriary\Infrastructure\API\Action\DeleteEntryAction
 
 parameters:
 	api:
@@ -20,7 +31,7 @@ parameters:
 
 		routes:
 			api:
-				"1.0":
+				'1.0':
 					/login:
 						post:
 							service: Caloriary\Infrastructure\API\Action\LoginAction
