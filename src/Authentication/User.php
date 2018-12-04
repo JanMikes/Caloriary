@@ -8,6 +8,7 @@ use Caloriary\Authentication\ReadModel\IsEmailRegistered;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authentication\Value\PasswordHash;
+use Caloriary\Authorization\Value\UserRole;
 
 final class User
 {
@@ -20,6 +21,11 @@ final class User
 	 * @var PasswordHash
 	 */
 	private $passwordHash;
+
+	/**
+	 * @var \Caloriary\Authorization\Value\UserRole
+	 */
+	private $role;
 
 	/**
 	 * @var int
@@ -75,6 +81,13 @@ final class User
 	}
 
 
+	public function changeRoleUser(User $user, UserRole $role): void
+	{
+		// @todo: Check if user is allowed to perform action
+		$this->role = $role;
+	}
+
+
 	private function __construct(
 		EmailAddress $emailAddress,
 		PasswordHash $passwordHash
@@ -82,5 +95,6 @@ final class User
 	{
 		$this->emailAddress = $emailAddress;
 		$this->passwordHash = $passwordHash;
+		$this->role = UserRole::get(UserRole::USER);
 	}
 }
