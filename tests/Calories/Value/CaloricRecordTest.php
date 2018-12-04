@@ -61,14 +61,37 @@ class CaloricRecordTest extends TestCase
 	}
 
 
+	/**
+	 * @doesNotPerformAssertions
+	 */
 	public function testEdit(): void
 	{
+		/** @var CaloricRecord $record */
+		$record = self::$fm->instance(CaloricRecord::class);
 
+		$record->edit(
+			\Mockery::mock(Calories::class),
+			\Mockery::mock(\DateTimeImmutable::class),
+			\Mockery::mock(MealDescription::class),
+			\Mockery::mock(User::class),
+			$this->createCanPerformActionOnResourceMock(true)
+		);
 	}
 
 
 	public function testEditShouldThrowExceptionWhenNotAuthorized(): void
 	{
 		$this->expectException(RestrictedAccess::class);
+
+		/** @var CaloricRecord $record */
+		$record = self::$fm->instance(CaloricRecord::class);
+
+		$record->edit(
+			\Mockery::mock(Calories::class),
+			\Mockery::mock(\DateTimeImmutable::class),
+			\Mockery::mock(MealDescription::class),
+			\Mockery::mock(User::class),
+			$this->createCanPerformActionOnResourceMock(false)
+		);
 	}
 }
