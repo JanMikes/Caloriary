@@ -14,6 +14,7 @@ final class ApiErrorHandler implements ErrorHandler
 	 */
 	private $logger;
 
+
 	public function __construct(ILogger $logger)
 	{
 		$this->logger = $logger;

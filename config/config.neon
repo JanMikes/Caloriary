@@ -65,6 +65,7 @@ services:
 	- Caloriary\Application\Action\EntryDetailAction
 	- Caloriary\Application\Action\EditEntryAction
 	- Caloriary\Application\Action\DeleteEntryAction
+	- Caloriary\Infrastructure\Application\Response\ResponseFormatter
 
 parameters:
 	api:

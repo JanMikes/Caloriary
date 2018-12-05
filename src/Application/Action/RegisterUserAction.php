@@ -5,11 +5,60 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use Caloriary\Authentication\Exception\EmailAddressAlreadyRegistered;
+use Caloriary\Authentication\ReadModel\IsEmailRegistered;
+use Caloriary\Authentication\User;
+use Caloriary\Authentication\Value\ClearTextPassword;
+use Caloriary\Authentication\Value\EmailAddress;
+use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
 final class RegisterUserAction implements ActionHandler
 {
+	/**
+	 * @var IsEmailRegistered
+	 */
+	private $isEmailRegistered;
+
+	/**
+	 * @var ResponseFormatter
+	 */
+	private $responseFormatter;
+
+
+	public function __construct(
+		ResponseFormatter $responseFormatter
+	)
+	{
+		$this->responseFormatter = $responseFormatter;
+	}
+
+
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
-		return $response->withJson([], 201);
+		$body = $request->getDecodedJsonFromBody();
+
+		// @TODO: Validate body, via middleware?
+		// @TODO: Transform into DTO, so we have strict types
+
+		try {
+			$emailAddress = EmailAddress::fromString($body->email ?? '');
+			$password = ClearTextPassword::fromString($body->password ?? '');
+
+			User::register($emailAddress, $password, $this->isEmailRegistered);
+		}
+
+		catch (\InvalidArgumentException $e) {
+			return $this->responseFormatter->formatError($response, $e->getMessage());
+		}
+
+		catch (EmailAddressAlreadyRegistered $e) {
+			$message = sprintf('Email %s is already registered', $emailAddress->toString());
+
+			return $this->responseFormatter->formatError($response, $message);
+		}
+
+		return $response->withJson([
+			'success' => true,
+		], 201);
 	}
 }
