@@ -31,7 +31,9 @@
         "nettrine/orm": "dev-xml-mapping",
         "nettrine/migrations": "^0.3.0",
         "contributte/console": "^0.5.0",
-        "tuupola/cors-middleware": "^0.9.1"
+        "tuupola/cors-middleware": "^0.9.1",
+        "tuupola/slim-jwt-auth": "^3.1",
+        "firebase/php-jwt": "^5.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5",
