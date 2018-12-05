@@ -64,7 +64,7 @@ final class RegisterUserAction implements ActionHandler
 		}
 
 		catch (EmailAddressAlreadyRegistered $e) {
-			$message = sprintf('Email %s is already registered', $emailAddress->toString());
+			$message = sprintf('Email %s is already registered', $e->emailAddress()->toString());
 
 			return $this->responseFormatter->formatError($response, $message);
 		}

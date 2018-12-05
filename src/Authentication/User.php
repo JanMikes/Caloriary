@@ -45,7 +45,7 @@ class User implements Resource
 	): self
 	{
 		if ($isEmailRegistered->__invoke($emailAddress)) {
-			throw new EmailAddressAlreadyRegistered();
+			throw new EmailAddressAlreadyRegistered($emailAddress);
 		}
 
 		return new self($emailAddress, $password->makeHash());

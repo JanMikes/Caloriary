@@ -10,9 +10,11 @@ final class DailyCaloriesLimitType extends IntegerType
 {
 	public function convertToPHPValue($value, AbstractPlatform $platform)
 	{
-		\assert(is_int($value));
+		\assert(is_numeric($value));
 
-		return DailyCaloriesLimit::fromInteger((int) $value);
+		$value = (int) $value;
+
+		return DailyCaloriesLimit::fromInteger($value);
 	}
 
 

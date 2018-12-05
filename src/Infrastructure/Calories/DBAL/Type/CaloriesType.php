@@ -10,9 +10,11 @@ final class CaloriesType extends IntegerType
 {
 	public function convertToPHPValue($value, AbstractPlatform $platform)
 	{
-		\assert(is_int($value));
+		\assert(is_numeric($value));
 
-		return Calories::fromInteger((int) $value);
+		$value = (int) $value;
+
+		return Calories::fromInteger($value);
 	}
 
 
