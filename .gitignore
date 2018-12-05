@@ -6,3 +6,5 @@
 docker-compose.yml
 
 /.docker/mysql-data
+
+.env

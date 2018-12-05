@@ -24,6 +24,8 @@ services:
       DATABASE_USER: "root"
       DATABASE_PASSWORD: ""
       DATABASE_HOST: "mysql"
+      DATABASE_NAME: "caloriary"
+      JWT_SECRET: "myTotallySuperSecretString"
     entrypoint: ["sh", "/wait-for-db.sh"]
     command: ["php-fpm"]
     depends_on:

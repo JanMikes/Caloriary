@@ -20,10 +20,10 @@ env:
 
 dbal:
 	connection:
-		host: mysql
-		user: root
-		password:
-		dbname: caloriary
+		host: @env::get('DATABASE_HOST')
+		user: @env::get('DATABASE_USER')
+		password: @env::get('DATABASE_PASSWORD')
+		dbname: @env::get('DATABASE_NAME')
 		types:
 			Caloriary\Authentication\Value\EmailAddress:
 				class: Caloriary\Infrastructure\Authentication\DBAL\Type\EmailAddressType
@@ -86,7 +86,7 @@ parameters:
 	jwt:
 		validForSeconds: 86400 # 24 hours
 		issuer: Caloriary
-		secret: xxx
+		secret: @env::get('JWT_SECRET')
 
 	api:
 		handlers:
