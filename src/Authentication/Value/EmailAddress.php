@@ -35,6 +35,12 @@ class EmailAddress
 	}
 
 
+	public function __toString(): string
+	{
+		return $this->toString();
+	}
+
+
 	private function __construct()
 	{
 	}

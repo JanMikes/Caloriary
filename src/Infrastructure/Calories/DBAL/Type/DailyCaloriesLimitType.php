@@ -12,7 +12,7 @@ final class DailyCaloriesLimitType extends IntegerType
 	{
 		\assert(is_int($value));
 
-		return DailyCaloriesLimit::fromInteger($value);
+		return DailyCaloriesLimit::fromInteger((int) $value);
 	}
 
 

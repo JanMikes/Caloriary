@@ -12,7 +12,7 @@ final class CaloriesType extends IntegerType
 	{
 		\assert(is_int($value));
 
-		return Calories::fromInteger($value);
+		return Calories::fromInteger((int) $value);
 	}
 
 
