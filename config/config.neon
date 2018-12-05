@@ -68,6 +68,7 @@ services:
 	- Caloriary\Application\Action\DeleteEntryAction
 	- Caloriary\Infrastructure\Application\Response\ResponseFormatter
 	- Tuupola\Middleware\CorsMiddleware(%cors%)
+	- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
 
 parameters:
 	cors:
@@ -84,6 +85,7 @@ parameters:
 
 		beforeRequestMiddlewares:
 			- Tuupola\Middleware\CorsMiddleware
+			- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
 
 		routes:
 			api:
