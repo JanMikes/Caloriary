@@ -4,8 +4,26 @@ REST API for the input of calories
 
 [API Documentation](https://documenter.getpostman.com/view/1523209/RzffKqKp)
 
-## Install
+## 2-step installation
 
 1. Run `cp docker-compose.dist.yml docker-compose.yml`
-2. Edit file `docker-compose.yml` for your needs
-3. Run `docker-compose up` and enjoy (by default app will run on localhost:8080)
+2. Run `docker-compose up` and enjoy (by default app will run on localhost:8080), *(optionally edit file `docker-compose.yml` for your needs)*
+
+## Configuration
+There are several ways how to customize application configuration.
+
+1. Environment variables
+2. Config file `config/config.local.neon`
+
+### Environment variables
+It is possible to use `.env` file to set environment variables (look at `.env.dist` as example). You can as well use environment variables in `docker-compose.yml`.
+
+These environment variables are supported:
+- `DATABASE_USER` (required)
+- `DATABASE_PASSWORD` (required)
+- `DATABASE_HOST` (required)
+- `DATABASE_NAME` (required)
+- `JWT_SECRET` (required)
+
+### Config file `config/config.local.neon`
+You can create this file and change anything. This is extremely useful for local development, etc disable logging. 
