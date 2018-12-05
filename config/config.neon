@@ -71,12 +71,18 @@ services:
 	- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
 	- Caloriary\Infrastructure\Authentication\Repository\DoctrineUsers(..., @orm.entityManager::getRepository(Caloriary\Authentication\User))
 	- Caloriary\Infrastructure\Authentication\ReadModel\DoesEmailExistInRepository
+	- Caloriary\Infrastructure\Authentication\Token\JsonWebTokenFactory(%jwt.issuer%, %jwt.secret%, %jwt.validForSeconds%)
 
 parameters:
 	cors:
 		origin: *
 		methods: [GET, POST, PUT, DELETE]
 		headers.allow: [X-Requested-With, X-Authorization, Accept, Content-Type, Origin, Accept-Language]
+
+	jwt:
+		validForSeconds: 86400 # 24 hours
+		issuer: Caloriary
+		secret: xxx
 
 	api:
 		handlers:

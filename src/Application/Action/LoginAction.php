@@ -8,6 +8,7 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Authentication\Exception\AuthenticationFailed;
 use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
+use Caloriary\Authentication\Token\IssueToken;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
@@ -24,14 +25,21 @@ final class LoginAction implements ActionHandler
 	 */
 	private $responseFormatter;
 
+	/**
+	 * @var IssueToken
+	 */
+	private $issueToken;
+
 
 	public function __construct(
 		Users $users,
-		ResponseFormatter $responseFormatter
+		ResponseFormatter $responseFormatter,
+		IssueToken $issueToken
 	)
 	{
 		$this->users = $users;
 		$this->responseFormatter = $responseFormatter;
+		$this->issueToken = $issueToken;
 	}
 
 
@@ -64,6 +72,7 @@ final class LoginAction implements ActionHandler
 
 		return $response->withJson([
 			'success' => true,
+			'token' => $this->issueToken->__invoke($emailAddress, $request->getUri()->getHost()),
 		], 201);
 	}
 
