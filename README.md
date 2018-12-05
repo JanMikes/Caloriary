@@ -2,6 +2,8 @@
 
 REST API for the input of calories
 
+[API Documentation](https://documenter.getpostman.com/view/1523209/RzffKqKp)
+
 ## Install
 
 1. Run `cp docker-compose.dist.yml docker-compose.yml`
