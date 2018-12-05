@@ -72,6 +72,7 @@ parameters:
 			notFound: Caloriary\Application\Handler\NotFoundHandler
 			notAllowed: Caloriary\Application\Handler\NotAllowedHandler
 			error: Caloriary\Application\Handler\ApiErrorHandler
+			phpError: Caloriary\Application\Handler\ApiErrorHandler
 
 		routes:
 			api:

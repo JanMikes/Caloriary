@@ -15,12 +15,16 @@
         {
             "type": "vcs",
             "url": "https://github.com/JanMikes/orm"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/JanMikes/slim-nette-extension"
         }
     ],
     "require": {
         "php": ">=7.2",
         "roave/security-advisories": "dev-master",
-        "brandembassy/slim-nette-extension": "^2.0",
+        "brandembassy/slim-nette-extension": "dev-fix-ignored-slimConfiguration",
         "tracy/tracy": "^2.5",
         "consistence/consistence": "^1.1",
         "ramsey/uuid": "^3.8",
