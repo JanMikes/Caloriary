@@ -7,12 +7,16 @@ extensions:
 	orm.console: Nettrine\ORM\DI\OrmConsoleExtension
 	orm.xml: Nettrine\ORM\DI\OrmXmlExtension
 	migrations: Nettrine\Migrations\DI\MigrationsExtension
+	env: wodCZ\NetteDotenv\DotEnvExtension
 
 slimApi:
 	slimConfiguration:
 		settings:
 			removeDefaultHandlers: true
 			determineRouteBeforeAppMiddleware: true
+
+env:
+	directory: %appDir%/../../
 
 dbal:
 	connection:
