@@ -7,6 +7,7 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Authentication\Exception\EmailAddressAlreadyRegistered;
 use Caloriary\Authentication\ReadModel\IsEmailRegistered;
+use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
@@ -24,12 +25,21 @@ final class RegisterUserAction implements ActionHandler
 	 */
 	private $responseFormatter;
 
+	/**
+	 * @var Users
+	 */
+	private $users;
+
 
 	public function __construct(
-		ResponseFormatter $responseFormatter
+		ResponseFormatter $responseFormatter,
+		IsEmailRegistered $isEmailRegistered,
+		Users $users
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
+		$this->isEmailRegistered = $isEmailRegistered;
+		$this->users = $users;
 	}
 
 
@@ -44,7 +54,9 @@ final class RegisterUserAction implements ActionHandler
 			$emailAddress = EmailAddress::fromString($body->email ?? '');
 			$password = ClearTextPassword::fromString($body->password ?? '');
 
-			User::register($emailAddress, $password, $this->isEmailRegistered);
+			$this->users->add(
+				User::register($emailAddress, $password, $this->isEmailRegistered)
+			);
 		}
 
 		catch (\InvalidArgumentException $e) {
