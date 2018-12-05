@@ -1,0 +1,15 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                   https://raw.github.com/doctrine/doctrine2/master/doctrine-mapping.xsd">
+
+    <entity name="Caloriary\Calories\CaloricRecord">
+        <id name="id" type="Caloriary\Calories\Value\CaloricRecordId" />
+        <field name="calories" type="Caloriary\Calories\Value\Calories" />
+        <field name="ateAt" type="datetime_immutable" />
+        <field name="text" type="Caloriary\Calories\Value\MealDescription" />
+        <many-to-one field="owner" target-entity="Caloriary\Authentication\User">
+            <join-column referenced-column-name="email_address" />
+        </many-to-one>
+    </entity>
+</doctrine-mapping>
