@@ -69,6 +69,8 @@ services:
 	- Caloriary\Infrastructure\Application\Response\ResponseFormatter
 	- Tuupola\Middleware\CorsMiddleware(%cors%)
 	- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
+	- Caloriary\Infrastructure\Authentication\Repository\DoctrineUsers(..., @orm.entityManager::getRepository(Caloriary\Authentication\User))
+	- Caloriary\Infrastructure\Authentication\ReadModel\DoesEmailExistInRepository
 
 parameters:
 	cors:
@@ -83,9 +85,11 @@ parameters:
 			error: Caloriary\Application\Handler\ApiErrorHandler
 			phpError: Caloriary\Application\Handler\ApiErrorHandler
 
+		beforeRouteMiddlewares:
+			- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
+
 		beforeRequestMiddlewares:
 			- Tuupola\Middleware\CorsMiddleware
-			- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
 
 		routes:
 			api:
