@@ -7,6 +7,8 @@ use Caloriary\Calories\Value\CaloricRecordId;
 
 interface CaloricRecords
 {
+	public function nextIdentity(): CaloricRecordId;
+
 	public function get(CaloricRecordId $recordId): CaloricRecord;
 
 	public function add(CaloricRecord $record): void;
