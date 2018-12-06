@@ -40,6 +40,9 @@ class CaloricRecord implements Resource
 	private $text;
 
 
+	/**
+	 * @throws RestrictedAccess
+	 */
 	public static function create(
 		CaloricRecordId $id,
 		User $owner,
@@ -65,6 +68,9 @@ class CaloricRecord implements Resource
 	}
 
 
+	/**
+	 * @throws RestrictedAccess
+	 */
 	public function edit(
 		Calories $calories,
 		\DateTimeImmutable $ateAt,

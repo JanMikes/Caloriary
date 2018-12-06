@@ -64,6 +64,9 @@ class User implements Resource
 	}
 
 
+	/**
+	 * @throws AuthenticationFailed
+	 */
 	public function authenticate(ClearTextPassword $password) : void
 	{
 		if ($password->matches($this->passwordHash) === false) {
@@ -72,6 +75,9 @@ class User implements Resource
 	}
 
 
+	/**
+	 * @throws RestrictedAccess
+	 */
 	public function editUser(
 		User $user,
 		DailyCaloriesLimit $dailyLimit,
@@ -86,6 +92,9 @@ class User implements Resource
 	}
 
 
+	/**
+	 * @throws RestrictedAccess
+	 */
 	public function changeUserPassword(
 		User $user,
 		ClearTextPassword $password,
@@ -100,6 +109,9 @@ class User implements Resource
 	}
 
 
+	/**
+	 * @throws RestrictedAccess
+	 */
 	public function changeUserRole(
 		User $user,
 		UserRole $role,
@@ -138,6 +150,9 @@ class User implements Resource
 	}
 
 
+	/**
+	 * @throws RestrictedAccess
+	 */
 	private function assertActionCanBePerformedOnResource(
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
 		UserAction $action,
