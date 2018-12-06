@@ -76,6 +76,7 @@ services:
 	- Caloriary\Infrastructure\Authentication\Repository\DoctrineUsers(..., @orm.entityManager::getRepository(Caloriary\Authentication\User))
 	- Caloriary\Infrastructure\Authentication\ReadModel\DoesEmailExistInRepository
 	- Caloriary\Infrastructure\Authentication\Token\JsonWebTokenFactory(%jwt.issuer%, %jwt.secret%, %jwt.validForSeconds%)
+	- Tuupola\Middleware\JwtAuthentication(%security%)
 
 parameters:
 	cors:
@@ -87,6 +88,13 @@ parameters:
 		validForSeconds: 86400 # 24 hours
 		issuer: Caloriary
 		secret: @env::get('JWT_SECRET')
+
+	security:
+		secret: %jwt.secret%
+		path: /api
+		ignore:
+			- /api/1.0/register
+			- /api/1.0/login
 
 	api:
 		handlers:
@@ -100,20 +108,22 @@ parameters:
 
 		beforeRequestMiddlewares:
 			- Tuupola\Middleware\CorsMiddleware
+			- Tuupola\Middleware\JwtAuthentication
 
 		routes:
 			api:
-				'1.0':
+				"1.0":
 					/login:
 						post:
 							service: Caloriary\Application\Action\LoginAction
 
+					/register:
+						post:
+							service: Caloriary\Application\Action\RegisterUserAction
+
 					/users:
 						get:
 							service: Caloriary\Application\Action\ListUsersAction
-
-						post:
-							service: Caloriary\Application\Action\RegisterUserAction
 
 					"/users/{userId}":
 						get:
