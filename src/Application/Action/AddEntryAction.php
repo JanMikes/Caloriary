@@ -59,8 +59,10 @@ final class AddEntryAction implements ActionHandler
 		try {
 			$email = EmailAddress::fromString($request->getAttribute('token')['sub']);
 			$calories = Calories::fromInteger($body->calories ?? 0);
-			$ateAt = \DateTimeImmutable::createFromFormat($body->date, DATE_ATOM);
-			$meal = MealDescription::fromString($body->text);
+			$ateAt = \DateTimeImmutable::createFromFormat($body->date ?? '', DATE_ATOM);
+			$meal = MealDescription::fromString($body->text ?? '');
+
+			// @TODO: if calories are not provided, then it should be calculated via API service
 
 			$record = CaloricRecord::create(
 				$this->caloricRecords->nextIdentity(),
