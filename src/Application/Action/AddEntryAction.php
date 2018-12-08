@@ -8,7 +8,7 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\Exception\RestrictedAccess;
-use Caloriary\Authorization\ReadModel\CanUserPerformAction;
+use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\Calories;
@@ -59,7 +59,7 @@ final class AddEntryAction implements ActionHandler
 		try {
 			$email = EmailAddress::fromString($request->getAttribute('token')['sub']);
 			$calories = Calories::fromInteger($body->calories ?? 0);
-			$ateAt = \DateTimeImmutable::createFromFormat($body->date ?? '', DATE_ATOM);
+			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 			$meal = MealDescription::fromString($body->text ?? '');
 
 			// @TODO: if calories are not provided, then it should be calculated via API service

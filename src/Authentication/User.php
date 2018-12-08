@@ -8,7 +8,7 @@ use Caloriary\Authentication\ReadModel\IsEmailRegistered;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authentication\Value\PasswordHash;
-use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
+use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Resource;
 use Caloriary\Authorization\Value\UserAction;
@@ -135,6 +135,12 @@ class User implements Resource
 	public function dailyLimit(): DailyCaloriesLimit
 	{
 		return $this->dailyLimit;
+	}
+
+
+	public function role(): UserRole
+	{
+		return $this->role;
 	}
 
 

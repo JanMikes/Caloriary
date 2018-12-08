@@ -8,7 +8,7 @@ class UserRole extends Enum
 {
 	public const USER = 'user';
 
-	public const USER_MANAGER = 'user_manager';
+	public const USER_MANAGER = 'userManager';
 
 	public const ADMIN = 'admin';
 }

@@ -9,7 +9,7 @@ use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\Exception\RestrictedAccess;
-use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
+use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Value\UserRole;
 use Caloriary\Calories\Value\DailyCaloriesLimit;
 use League\FactoryMuffin\FactoryMuffin;

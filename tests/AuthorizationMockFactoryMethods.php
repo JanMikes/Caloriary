@@ -2,8 +2,8 @@
 
 namespace Tests\Caloriary;
 
-use Caloriary\Authorization\ReadModel\CanUserPerformAction;
-use Caloriary\Authorization\ReadModel\CanUserPerformActionOnResource;
+use Caloriary\Authorization\ACL\CanUserPerformAction;
+use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 
 trait AuthorizationMockFactoryMethods
 {

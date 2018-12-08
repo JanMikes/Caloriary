@@ -76,8 +76,9 @@ services:
 	- Caloriary\Infrastructure\Authentication\Repository\DoctrineUsers(..., @orm.entityManager::getRepository(Caloriary\Authentication\User))
 	- Caloriary\Infrastructure\Authentication\ReadModel\DoesEmailExistInRepository
 	- Caloriary\Infrastructure\Authentication\Token\JsonWebTokenFactory(%jwt.issuer%, %jwt.secret%, %jwt.validForSeconds%)
-	- Tuupola\Middleware\JwtAuthentication(%security%)
+	- Tuupola\Middleware\JwtAuthentication(%security.authentication%)
 	- Caloriary\Infrastructure\Calories\Repository\DoctrineCaloricRecords(..., @orm.entityManager::getRepository(Caloriary\Calories\CaloricRecord))
+	- Caloriary\Infrastructure\Authorization\ACL\Permissions(%security.acl%)
 
 parameters:
 	cors:
@@ -91,11 +92,20 @@ parameters:
 		secret: @env::get('JWT_SECRET')
 
 	security:
-		secret: %jwt.secret%
-		path: /api
-		ignore:
-			- /api/1.0/register
-			- /api/1.0/login
+		authentication:
+			secret: %jwt.secret%
+			path: /api
+			ignore:
+				- /api/1.0/register
+				- /api/1.0/login
+		acl:
+			admin: Caloriary\Authorization\Value\UserAction::getAvailableValues()
+			userManager:
+				- Caloriary\Authorization\Value\UserAction::CHANGE_USER_PASSWORD
+				- Caloriary\Authorization\Value\UserAction::EDIT_USER
+			user:
+				- Caloriary\Authorization\Value\UserAction::CREATE_CALORIC_RECORD
+
 
 	api:
 		handlers:

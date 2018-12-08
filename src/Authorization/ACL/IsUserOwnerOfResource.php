@@ -1,6 +1,6 @@
 <?php declare (strict_types=1);
 
-namespace Caloriary\Authorization\ReadModel;
+namespace Caloriary\Authorization\ACL;
 
 use Caloriary\Authentication\User;
 use Caloriary\Authorization\Resource;

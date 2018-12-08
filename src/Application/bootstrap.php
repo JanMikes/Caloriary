@@ -6,6 +6,8 @@ use Tracy\Debugger;
 require __DIR__ . '/../../vendor/autoload.php';
 
 $configurator = new Configurator();
+unset($configurator->defaultExtensions['security']);
+
 $configurator->setTempDirectory(__DIR__ . '/../../var/temp');
 $configurator->addConfig(__DIR__ . '/../../config/config.neon');
 
