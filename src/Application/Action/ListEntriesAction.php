@@ -78,6 +78,7 @@ final class ListEntriesAction implements ActionHandler
 				'date' => $record->ateAt()->format(DATE_ATOM),
 				'text' => $record->text()->toString(),
 				'calories' => $record->calories()->toInteger(),
+				'withinLimit' => true, // @TODO
 			];
 		}, $records), 200);
 	}

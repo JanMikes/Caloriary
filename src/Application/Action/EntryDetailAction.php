@@ -86,6 +86,7 @@ final class EntryDetailAction implements ActionHandler
 			'date' => $caloricRecord->ateAt()->format(DATE_ATOM),
 			'text' => $caloricRecord->text()->toString(),
 			'calories' => $caloricRecord->calories()->toInteger(),
+			'withinLimit' => true, // @TODO
 		], 200);
 	}
 }
