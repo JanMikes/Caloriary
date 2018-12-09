@@ -86,6 +86,7 @@ services:
 	- Caloriary\Infrastructure\Calories\ReadModel\DQLGetListOfCaloricRecordsForUser
 	- Caloriary\Application\Action\AddEntryToSpecificUserAction
 	- Caloriary\Application\Action\ListEntriesForSpecificUserAction
+	- Caloriary\Infrastructure\Calories\ReadModel\CachedQueryHasCaloriesWithinDailyLimit
 
 parameters:
 	cors:

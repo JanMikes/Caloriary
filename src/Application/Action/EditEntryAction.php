@@ -10,6 +10,7 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\Exception\CaloricRecordNotFound;
+use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Calories\Value\Calories;
@@ -44,13 +45,19 @@ final class EditEntryAction implements ActionHandler
 	 */
 	private $manager;
 
+	/**
+	 * @var HasCaloriesWithinDailyLimit
+	 */
+	private $hasCaloriesWithinDailyLimit;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
 		CaloricRecords $caloricRecords,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		ObjectManager $manager
+		ObjectManager $manager,
+		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -58,6 +65,7 @@ final class EditEntryAction implements ActionHandler
 		$this->caloricRecords = $caloricRecords;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->manager = $manager;
+		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 	}
 
 
@@ -113,7 +121,7 @@ final class EditEntryAction implements ActionHandler
 			'date' => $caloricRecord->ateAt()->format(DATE_ATOM),
 			'text' => $caloricRecord->text()->toString(),
 			'calories' => $caloricRecord->calories()->toInteger(),
-			'withinLimit' => true, // @TODO
+			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($caloricRecord),
 		], 200);
 	}
 }

@@ -10,6 +10,7 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Calories\CaloricRecord;
+use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
@@ -37,18 +38,25 @@ final class AddEntryAction implements ActionHandler
 	 */
 	private $responseFormatter;
 
+	/**
+	 * @var HasCaloriesWithinDailyLimit
+	 */
+	private $hasCaloriesWithinDailyLimit;
+
 
 	public function __construct(
 		CaloricRecords $caloricRecords,
 		Users $users,
 		CanUserPerformAction $canUserPerformAction,
-		ResponseFormatter $responseFormatter
+		ResponseFormatter $responseFormatter,
+		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->responseFormatter = $responseFormatter;
+		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 	}
 
 
@@ -97,7 +105,7 @@ final class AddEntryAction implements ActionHandler
 			'date' => $record->ateAt()->format(DATE_ATOM),
 			'calories' => $record->calories()->toInteger(),
 			'text' => $record->text()->toString(),
-			'withinLimit' => true, // @TODO
+			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
 		], 201);
 	}
 }

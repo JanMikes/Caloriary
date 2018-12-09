@@ -38,6 +38,12 @@ class DailyCaloriesLimit
 	}
 
 
+	public function isLimited(): bool
+	{
+		return $this->limit > 0;
+	}
+
+
 	private function __construct()
 	{
 	}
