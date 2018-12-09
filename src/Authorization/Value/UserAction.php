@@ -27,4 +27,6 @@ final class UserAction extends Enum
 	public const LIST_USERS = 'list_users';
 
 	public const LIST_CALORIC_RECORDS = 'list_caloric_records';
+
+	public const CALORIC_RECORD_DETAIL = 'caloric_record_detail';
 }
