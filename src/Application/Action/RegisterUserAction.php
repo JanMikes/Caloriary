@@ -69,6 +69,7 @@ final class RegisterUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $message);
 		}
 
+		// @TODO: transformer for response
 		return $response->withJson([
 			'success' => true,
 		], 201);

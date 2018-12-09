@@ -70,6 +70,7 @@ final class LoginAction implements ActionHandler
 			return $this->createAuthenticationFailedResponse($response);
 		}
 
+		// @TODO: transformer for response
 		return $response->withJson([
 			'success' => true,
 			'token' => $this->issueToken->__invoke($emailAddress, $request->getUri()->getHost()),

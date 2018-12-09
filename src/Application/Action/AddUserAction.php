@@ -58,13 +58,12 @@ final class AddUserAction implements ActionHandler
 		// @TODO: Validate body, via middleware?
 		// @TODO: Transform into DTO, so we have strict types
 
-		$body = $request->getDecodedJsonFromBody();
-		$currentUser = $this->users->get(
-			EmailAddress::fromString($request->getAttribute('token')['sub'])
-		);
-
-
 		try {
+			$body = $request->getDecodedJsonFromBody();
+			// @TODO: get user from attributes (set it via middleware)
+			$currentUser = $this->users->get(
+				EmailAddress::fromString($request->getAttribute('token')['sub'])
+			);
 			$emailAddress = EmailAddress::fromString($body->email ?? '');
 			$password = ClearTextPassword::fromString($body->password ?? '');
 			$dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);
@@ -95,6 +94,7 @@ final class AddUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
+		// @TODO: transformer for response
 		return $response->withJson([
 			'success' => true,
 		], 201);

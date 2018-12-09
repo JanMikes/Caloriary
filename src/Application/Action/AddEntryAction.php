@@ -57,7 +57,10 @@ final class AddEntryAction implements ActionHandler
 		$body = $request->getDecodedJsonFromBody();
 
 		try {
-			$email = EmailAddress::fromString($request->getAttribute('token')['sub']);
+			// @TODO: get user from attributes (set it via middleware)
+			$user = $this->users->get(
+				EmailAddress::fromString($request->getAttribute('token')['sub'])
+			);
 			$calories = Calories::fromInteger($body->calories ?? 0);
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 			$meal = MealDescription::fromString($body->text ?? '');
@@ -66,7 +69,7 @@ final class AddEntryAction implements ActionHandler
 
 			$record = CaloricRecord::create(
 				$this->caloricRecords->nextIdentity(),
-				$this->users->get($email),
+				$user,
 				$calories,
 				$ateAt,
 				$meal,
@@ -84,6 +87,7 @@ final class AddEntryAction implements ActionHandler
 
 		$this->caloricRecords->add($record);
 
+		// @TODO: transformer for response
 		return $response->withJson([
 			'id' => $record->id()->toString(),
 			'date' => $record->ateAt()->format(DATE_ATOM),
