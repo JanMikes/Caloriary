@@ -80,6 +80,7 @@ services:
 	- Caloriary\Infrastructure\Calories\Repository\DoctrineCaloricRecords(..., @orm.entityManager::getRepository(Caloriary\Calories\CaloricRecord))
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForAction(%security.acl%)
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForActionOnResource
+	- Caloriary\Application\Action\AddUserAction
 
 parameters:
 	cors:
@@ -104,6 +105,7 @@ parameters:
 			userManager:
 				- Caloriary\Authorization\Value\UserAction::CHANGE_USER_PASSWORD
 				- Caloriary\Authorization\Value\UserAction::EDIT_USER
+				- Caloriary\Authorization\Value\UserAction::ADD_USER
 			user:
 				- Caloriary\Authorization\Value\UserAction::CREATE_CALORIC_RECORD
 
@@ -136,6 +138,9 @@ parameters:
 					/users:
 						get:
 							service: Caloriary\Application\Action\ListUsersAction
+
+						post:
+							service: Caloriary\Application\Action\AddUserAction
 
 					"/users/{userId}":
 						get:

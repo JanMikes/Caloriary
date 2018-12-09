@@ -8,6 +8,7 @@ use Caloriary\Authentication\ReadModel\IsEmailRegistered;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authentication\Value\PasswordHash;
+use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Resource;
@@ -49,6 +50,33 @@ class User implements Resource
 		}
 
 		return new self($emailAddress, $password->makeHash());
+	}
+
+
+	public static function createByAdmin(
+		EmailAddress $emailAddress,
+		ClearTextPassword $password,
+		DailyCaloriesLimit $dailyLimit,
+		User $editor,
+		IsEmailRegistered $isEmailRegistered,
+		CanUserPerformAction $canUserPerformAction
+	): self
+	{
+		$action = UserAction::get(UserAction::ADD_USER);
+
+		if (! $canUserPerformAction->__invoke($editor, $action)) {
+			throw new RestrictedAccess();
+		}
+
+		if ($isEmailRegistered->__invoke($emailAddress)) {
+			throw new EmailAddressAlreadyRegistered($emailAddress);
+		}
+
+		$user = new self($emailAddress, $password->makeHash());
+
+		$user->dailyLimit = $dailyLimit;
+
+		return $user;
 	}
 
 
