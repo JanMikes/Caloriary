@@ -82,6 +82,7 @@ services:
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForActionOnResource
 	- Caloriary\Application\Action\AddUserAction
 	- Caloriary\Infrastructure\Authentication\ReadModel\DQLGetUsersList
+	- Caloriary\Application\Action\SelfUserDetailAction
 
 parameters:
 	cors:
@@ -131,6 +132,10 @@ parameters:
 		routes:
 			api:
 				"1.0":
+					/me:
+						get:
+							service: Caloriary\Application\Action\SelfUserDetailAction
+
 					/login:
 						post:
 							service: Caloriary\Application\Action\LoginAction
