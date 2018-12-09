@@ -7,7 +7,7 @@ use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Value\UserAction;
 use Nette\Security\Permission;
 
-final class Permissions implements CanUserPerformAction
+final class HasUserPermissionForAction implements CanUserPerformAction
 {
 	/**
 	 * @var Permission

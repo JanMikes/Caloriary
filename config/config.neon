@@ -78,7 +78,8 @@ services:
 	- Caloriary\Infrastructure\Authentication\Token\JsonWebTokenFactory(%jwt.issuer%, %jwt.secret%, %jwt.validForSeconds%)
 	- Tuupola\Middleware\JwtAuthentication(%security.authentication%)
 	- Caloriary\Infrastructure\Calories\Repository\DoctrineCaloricRecords(..., @orm.entityManager::getRepository(Caloriary\Calories\CaloricRecord))
-	- Caloriary\Infrastructure\Authorization\ACL\Permissions(%security.acl%)
+	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForAction(%security.acl%)
+	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForActionOnResource
 
 parameters:
 	cors:
