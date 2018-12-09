@@ -21,4 +21,8 @@ final class UserAction extends Enum
 	public const DELETE_CALORIC_RECORD = 'delete_caloric_record';
 
 	public const DELETE_USER = 'delete_user';
+
+	public const USER_DETAIL = 'user_detail';
+
+	public const LIST_USERS = 'list_users';
 }
