@@ -85,6 +85,7 @@ services:
 	- Caloriary\Application\Action\SelfUserDetailAction
 	- Caloriary\Infrastructure\Calories\ReadModel\DQLGetListOfCaloricRecordsForUser
 	- Caloriary\Application\Action\AddEntryToSpecificUserAction
+	- Caloriary\Application\Action\ListEntriesForSpecificUserAction
 
 parameters:
 	cors:
@@ -183,5 +184,8 @@ parameters:
 
 
 					"/users/{email}/entries":
+						get:
+							service: Caloriary\Application\Action\ListEntriesForSpecificUserAction
+
 						post:
 							service: Caloriary\Application\Action\AddEntryToSpecificUserAction

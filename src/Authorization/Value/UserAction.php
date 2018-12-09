@@ -31,4 +31,6 @@ final class UserAction extends Enum
 	public const CALORIC_RECORD_DETAIL = 'caloric_record_detail';
 
 	public const ADD_CALORIC_RECORD_TO_SPECIFIC_USER = 'add_caloric_record_to_specific_user';
+
+	public const LIST_CALORIC_RECORDS_FOR_SPECIFIC_USER = 'list_caloric_records_for_specific_user';
 }
