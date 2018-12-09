@@ -81,6 +81,7 @@ services:
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForAction(%security.acl%)
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForActionOnResource
 	- Caloriary\Application\Action\AddUserAction
+	- Caloriary\Infrastructure\Authentication\ReadModel\DQLGetUsersList
 
 parameters:
 	cors:
@@ -107,6 +108,8 @@ parameters:
 				- Caloriary\Authorization\Value\UserAction::EDIT_USER
 				- Caloriary\Authorization\Value\UserAction::ADD_USER
 				- Caloriary\Authorization\Value\UserAction::DELETE_USER
+				- Caloriary\Authorization\Value\UserAction::USER_DETAIL
+				- Caloriary\Authorization\Value\UserAction::LIST_USERS
 			user:
 				- Caloriary\Authorization\Value\UserAction::CREATE_CALORIC_RECORD
 
