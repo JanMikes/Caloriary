@@ -65,6 +65,10 @@ final class AddEntryAction implements ActionHandler
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 			$meal = MealDescription::fromString($body->text ?? '');
 
+			if (! $ateAt instanceof \DateTimeImmutable) {
+				throw new \InvalidArgumentException('Invalid date provided!');
+			}
+
 			// @TODO: if calories are not provided, then it should be calculated via API service
 
 			$record = CaloricRecord::create(
