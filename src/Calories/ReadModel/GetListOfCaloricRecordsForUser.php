@@ -2,7 +2,7 @@
 
 namespace Caloriary\Calories\ReadModel;
 
-use Caloriary\Authentication\Value\EmailAddress;
+use Caloriary\Authentication\User;
 use Caloriary\Calories\CaloricRecord;
 
 interface GetListOfCaloricRecordsForUser
@@ -13,5 +13,5 @@ interface GetListOfCaloricRecordsForUser
 	 *
 	 * @return CaloricRecord[]
 	 */
-	public function __invoke(EmailAddress $emailAddress): array;
+	public function __invoke(User $user): array;
 }

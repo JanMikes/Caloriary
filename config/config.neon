@@ -83,6 +83,7 @@ services:
 	- Caloriary\Application\Action\AddUserAction
 	- Caloriary\Infrastructure\Authentication\ReadModel\DQLGetUsersList
 	- Caloriary\Application\Action\SelfUserDetailAction
+	- Caloriary\Infrastructure\Calories\ReadModel\DQLGetListOfCaloricRecordsForUser
 
 parameters:
 	cors:
@@ -113,6 +114,7 @@ parameters:
 				- Caloriary\Authorization\Value\UserAction::LIST_USERS
 			user:
 				- Caloriary\Authorization\Value\UserAction::CREATE_CALORIC_RECORD
+				- Caloriary\Authorization\Value\UserAction::LIST_CALORIC_RECORDS
 
 
 	api:
