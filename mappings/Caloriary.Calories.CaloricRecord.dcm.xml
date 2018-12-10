@@ -9,7 +9,7 @@
         <field name="ateAt" type="datetime_immutable" />
         <field name="text" type="Caloriary\Calories\Value\MealDescription" />
         <many-to-one field="owner" target-entity="Caloriary\Authentication\User">
-            <join-column referenced-column-name="email_address" />
+            <join-column referenced-column-name="email_address" on-delete="CASCADE" />
         </many-to-one>
     </entity>
 </doctrine-mapping>
