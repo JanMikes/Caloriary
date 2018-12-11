@@ -50,7 +50,7 @@ final class Nutritionix
 		} catch (ClientException $e) {
 			$response = $e->getResponse();
 
-			if ($response->getStatusCode() === 404) {
+			if ($response && $response->getStatusCode() === 404) {
 				return [];
 			}
 
