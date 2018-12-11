@@ -88,6 +88,7 @@ services:
 	- Caloriary\Application\Action\ListEntriesForSpecificUserAction
 	- Caloriary\Infrastructure\Calories\ReadModel\CachedQueryHasCaloriesWithinDailyLimit
 	- JanMikes\Nutritionix\Nutritionix(@env::get('NUTRITIONIX_APP_ID'), @env::get('NUTRITIONIX_API_KEY'))
+	- Caloriary\Infrastructure\Calories\ReadModel\GetCaloriesForMealFromNutritionix
 
 parameters:
 	cors:

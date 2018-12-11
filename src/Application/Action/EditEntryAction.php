@@ -10,6 +10,8 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\Exception\CaloricRecordNotFound;
+use Caloriary\Calories\Exception\MealNotFound;
+use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
 use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
@@ -50,6 +52,11 @@ final class EditEntryAction implements ActionHandler
 	 */
 	private $hasCaloriesWithinDailyLimit;
 
+	/**
+	 * @var GetCaloriesForMeal
+	 */
+	private $getCaloriesForMeal;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -57,7 +64,8 @@ final class EditEntryAction implements ActionHandler
 		CaloricRecords $caloricRecords,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
 		ObjectManager $manager,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
+		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
+		GetCaloriesForMeal $getCaloriesForMeal
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -66,6 +74,7 @@ final class EditEntryAction implements ActionHandler
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->manager = $manager;
 		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
+		$this->getCaloriesForMeal = $getCaloriesForMeal;
 	}
 
 
@@ -82,14 +91,18 @@ final class EditEntryAction implements ActionHandler
 			);
 			$recordId = CaloricRecordId::fromString($arguments['entryId'] ?? '');
 			$caloricRecord = $this->caloricRecords->get($recordId);
-
-			$calories = Calories::fromInteger($body->calories ?? 0);
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
-			// @TODO: if calories are not provided, then it should be calculated via API service
-			$meal = MealDescription::fromString($body->text ?? '');
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
 				throw new \InvalidArgumentException('Invalid date provided!');
+			}
+
+			$meal = MealDescription::fromString($body->text ?? '');
+
+			if (isset($body->calories)) {
+				$calories = Calories::fromInteger($body->calories);
+			} else {
+				$calories = $this->getCaloriesForMeal->__invoke($meal);
 			}
 
 			$caloricRecord->edit(
@@ -113,6 +126,10 @@ final class EditEntryAction implements ActionHandler
 
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+		}
+
+		catch (MealNotFound $e) {
+			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
 		// @TODO: transformer for response

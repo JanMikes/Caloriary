@@ -3,6 +3,7 @@
 namespace JanMikes\Nutritionix;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Nette\Utils\Json;
 
 final class Nutritionix
@@ -33,17 +34,27 @@ final class Nutritionix
 	 */
 	public function searchForFoods(string $text): array
 	{
-		$response = $this->client->post('/v2/natural/nutrients', [
-			'body' => [
-				'query' => $text,
-			],
-		]);
+		try {
+			$response = $this->client->post('/v2/natural/nutrients', [
+				'body' => Json::encode([
+					'query' => $text,
+				]),
+			]);
 
-		$body = (string) $response->getBody();
-		$data = Json::decode($body);
+			$body = (string) $response->getBody();
+			$data = Json::decode($body);
 
-		return array_map(function(\stdClass $food) {
-			return new Food($food->food_name, $food->nf_calories);
-		}, $data->foods);
+			return array_map(function(\stdClass $food) {
+				return new Food($food->food_name, (int) $food->nf_calories);
+			}, $data->foods);
+		} catch (ClientException $e) {
+			$response = $e->getResponse();
+
+			if ($response->getStatusCode() === 404) {
+				return [];
+			}
+
+			throw $e;
+		}
 	}
 }

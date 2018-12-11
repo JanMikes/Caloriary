@@ -12,6 +12,8 @@ use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Calories\CaloricRecord;
+use Caloriary\Calories\Exception\MealNotFound;
+use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
@@ -39,18 +41,25 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 	 */
 	private $responseFormatter;
 
+	/**
+	 * @var GetCaloriesForMeal
+	 */
+	private $getCaloriesForMeal;
+
 
 	public function __construct(
 		CaloricRecords $caloricRecords,
 		Users $users,
 		CanUserPerformAction $canUserPerformAction,
-		ResponseFormatter $responseFormatter
+		ResponseFormatter $responseFormatter,
+		GetCaloriesForMeal $getCaloriesForMeal
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->responseFormatter = $responseFormatter;
+		$this->getCaloriesForMeal = $getCaloriesForMeal;
 	}
 
 
@@ -73,15 +82,19 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
-			$calories = Calories::fromInteger($body->calories ?? 0);
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
-			$meal = MealDescription::fromString($body->text ?? '');
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
 				throw new \InvalidArgumentException('Invalid date provided!');
 			}
 
-			// @TODO: if calories are not provided, then it should be calculated via API service
+			$meal = MealDescription::fromString($body->text ?? '');
+
+			if (isset($body->calories)) {
+				$calories = Calories::fromInteger($body->calories);
+			} else {
+				$calories = $this->getCaloriesForMeal->__invoke($meal);
+			}
 
 			$record = CaloricRecord::create(
 				$this->caloricRecords->nextIdentity(),
@@ -103,6 +116,10 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+		}
+
+		catch (MealNotFound $e) {
+			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
 		$this->caloricRecords->add($record);
