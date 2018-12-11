@@ -7,6 +7,7 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
+use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
@@ -76,11 +77,7 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 				EmailAddress::fromString($arguments['email'] ?? '')
 			);
 
-			$action = UserAction::get(UserAction::ADD_CALORIC_RECORD_TO_SPECIFIC_USER);
-
-			if (! $this->canUserPerformAction->__invoke($currentUser, $action)) {
-				throw new RestrictedAccess();
-			}
+			$this->ensureUserCanAddCaloricRecordToAnotherUser($currentUser);
 
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 
@@ -132,5 +129,18 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 			'text' => $record->text()->toString(),
 			'withinLimit' => true, // @TODO
 		], 201);
+	}
+
+
+	/**
+	 * @param User $currentUser
+	 */
+	private function ensureUserCanAddCaloricRecordToAnotherUser(User $currentUser): void
+	{
+		$action = UserAction::get(UserAction::ADD_CALORIC_RECORD_TO_SPECIFIC_USER);
+
+		if (!$this->canUserPerformAction->__invoke($currentUser, $action)) {
+			throw new RestrictedAccess();
+		}
 	}
 }
