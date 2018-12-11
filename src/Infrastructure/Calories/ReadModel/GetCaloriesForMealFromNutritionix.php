@@ -25,7 +25,7 @@ final class GetCaloriesForMealFromNutritionix implements GetCaloriesForMeal
 	public function __invoke(MealDescription $meal): Calories
 	{
 		$calories = 0;
-		$foods = $this->nutritionix->searchForFoods($meal->toString());
+		$foods = $this->nutritionix->searchFoods($meal->toString());
 
 		if (count($foods) === 0) {
 			throw new MealNotFound($meal);

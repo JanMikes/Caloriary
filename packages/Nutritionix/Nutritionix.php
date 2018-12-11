@@ -32,7 +32,7 @@ final class Nutritionix
 	/**
 	 * @return Food[]
 	 */
-	public function searchForFoods(string $text): array
+	public function searchFoods(string $text): array
 	{
 		try {
 			$response = $this->client->post('/v2/natural/nutrients', [
