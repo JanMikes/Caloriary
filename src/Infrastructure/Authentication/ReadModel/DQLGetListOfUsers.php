@@ -42,13 +42,16 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
 			$builder
 				->setMaxResults($this->paginator->getItemsPerPage())
 				->setFirstResult($this->paginator->getOffset());
+
+			// This should prevent bugs, pagination will be valid only for single Query
+			$this->paginator = null;
 		}
 
 		return $builder->getQuery()->getResult();
 	}
 
 
-	public function applyPaginator(Paginator $paginator): void
+	public function applyPaginatorForNextQuery(Paginator $paginator): void
 	{
 		$this->paginator = $paginator;
 	}

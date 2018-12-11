@@ -91,6 +91,7 @@ services:
 	- Caloriary\Infrastructure\Calories\ReadModel\GetCaloriesForMealFromNutritionix
 	- Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory(%pagination.maxItemsPerPage%, %pagination.defaultItemsPerPage%)
 	- Caloriary\Infrastructure\Authentication\ReadModel\DQLCountUsers
+	- Caloriary\Infrastructure\Calories\ReadModel\DQLCountCaloricRecordsOfUser
 
 parameters:
 	pagination:

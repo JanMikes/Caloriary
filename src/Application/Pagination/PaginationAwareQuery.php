@@ -6,5 +6,5 @@ use Nette\Utils\Paginator;
 
 interface PaginationAwareQuery
 {
-	public function applyPaginator(Paginator $paginator): void;
+	public function applyPaginatorForNextQuery(Paginator $paginator): void;
 }

@@ -5,6 +5,7 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
@@ -12,8 +13,10 @@ use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Calories\CaloricRecord;
+use Caloriary\Calories\ReadModel\CountCaloricRecordsOfUser;
 use Caloriary\Calories\ReadModel\GetListOfCaloricRecordsForUser;
 use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
+use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
 final class ListEntriesForSpecificUserAction implements ActionHandler
@@ -43,13 +46,25 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 	 */
 	private $hasCaloriesWithinDailyLimit;
 
+	/**
+	 * @var PaginatorFromRequestFactory
+	 */
+	private $paginatorFromRequestFactory;
+
+	/**
+	 * @var CountCaloricRecordsOfUser
+	 */
+	private $countCaloricRecordsOfUser;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
 		GetListOfCaloricRecordsForUser $getListOfCaloricRecordsForUser,
 		CanUserPerformAction $canUserPerformAction,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
+		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
+		PaginatorFromRequestFactory $paginatorFromRequestFactory,
+		CountCaloricRecordsOfUser $countCaloricRecordsOfUser
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -57,6 +72,8 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->getListOfCaloricRecordsForUser = $getListOfCaloricRecordsForUser;
 		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
+		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
+		$this->countCaloricRecordsOfUser = $countCaloricRecordsOfUser;
 	}
 
 
@@ -76,7 +93,20 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
+			$paginator = $this->paginatorFromRequestFactory->create(
+				$request,
+				$this->countCaloricRecordsOfUser->__invoke($user)
+			);
+
+			if ($this->getListOfCaloricRecordsForUser instanceof PaginationAwareQuery) {
+				$this->getListOfCaloricRecordsForUser->applyPaginatorForNextQuery($paginator);
+			}
+
 			$records = $this->getListOfCaloricRecordsForUser->__invoke($user);
+		}
+
+		catch (\InvalidArgumentException $e) {
+			return $this->responseFormatter->formatError($response, $e->getMessage(), 400);
 		}
 
 		catch (UserNotFound $e) {
@@ -88,14 +118,20 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 		}
 
 		// @TODO: transformer for response
-		return $response->withJson(array_map(function(CaloricRecord $record) {
-			return [
-				'id' => $record->id()->toString(),
-				'date' => $record->ateAt()->format(DATE_ATOM),
-				'text' => $record->text()->toString(),
-				'calories' => $record->calories()->toInteger(),
-				'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
-			];
-		}, $records), 200);
+		return $response->withJson([
+			'page' => $paginator->getPage(),
+			'limit' => $paginator->getItemsPerPage(),
+			'pages' => $paginator->getPageCount(),
+			'totalCount' => $paginator->getItemCount(),
+			'results' => array_map(function(CaloricRecord $record) {
+				return [
+					'id' => $record->id()->toString(),
+					'date' => $record->ateAt()->format(DATE_ATOM),
+					'text' => $record->text()->toString(),
+					'calories' => $record->calories()->toInteger(),
+					'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
+				];
+			}, $records)
+		], 200);
 	}
 }

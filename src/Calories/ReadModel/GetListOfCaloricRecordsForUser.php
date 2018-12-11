@@ -8,9 +8,6 @@ use Caloriary\Calories\CaloricRecord;
 interface GetListOfCaloricRecordsForUser
 {
 	/**
-	 * @todo: paging
-	 * @todo: filtering
-	 *
 	 * @return CaloricRecord[]
 	 */
 	public function __invoke(User $user): array;

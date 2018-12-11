@@ -84,7 +84,7 @@ final class ListUsersAction implements ActionHandler
 			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers->__invoke());
 
 			if ($this->getListOfUsers instanceof PaginationAwareQuery) {
-				$this->getListOfUsers->applyPaginator($paginator);
+				$this->getListOfUsers->applyPaginatorForNextQuery($paginator);
 			}
 
 			$users = $this->getListOfUsers->__invoke();
