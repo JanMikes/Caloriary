@@ -43,7 +43,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Caloriary\\": "src"
+            "Caloriary\\": "src",
+            "JanMikes\\": "packages"
         }
     },
     "autoload-dev": {
