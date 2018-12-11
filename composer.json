@@ -31,7 +31,8 @@
         "tuupola/slim-jwt-auth": "^3.1",
         "firebase/php-jwt": "^5.0",
         "wodcz/nette-dotenv": "^2.0",
-        "nette/security": "^2.4"
+        "nette/security": "^2.4",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5",
