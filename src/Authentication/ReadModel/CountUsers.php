@@ -2,8 +2,7 @@
 
 namespace Caloriary\Authentication\ReadModel;
 
-use Caloriary\Application\Pagination\TotalItemsCounter;
-
-interface CountUsers extends TotalItemsCounter
+interface CountUsers
 {
+	public function __invoke(): int;
 }

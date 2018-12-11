@@ -81,7 +81,7 @@ final class ListUsersAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
-			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers);
+			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers->__invoke());
 
 			if ($this->getListOfUsers instanceof PaginationAwareQuery) {
 				$this->getListOfUsers->applyPaginator($paginator);

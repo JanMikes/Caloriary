@@ -3,7 +3,6 @@
 namespace Caloriary\Infrastructure\Application\Pagination;
 
 use BrandEmbassy\Slim\Request\RequestInterface;
-use Caloriary\Application\Pagination\TotalItemsCounter;
 use Nette\Utils\Paginator;
 
 final class PaginatorFromRequestFactory
@@ -29,7 +28,7 @@ final class PaginatorFromRequestFactory
 	/**
 	 * @throws \InvalidArgumentException
 	 */
-	public function create(RequestInterface $request, TotalItemsCounter $itemsCounter): Paginator
+	public function create(RequestInterface $request, int $itemsCount): Paginator
 	{
 		$page = $request->getQueryParam('page', 1);
 		$this->assertPageIsNumeric($page);
@@ -41,7 +40,7 @@ final class PaginatorFromRequestFactory
 
 		$paginator->setPage($page);
 		$paginator->setItemsPerPage(min($itemsPerPage, $this->maxLimit));
-		$paginator->setItemCount($itemsCounter->__invoke());
+		$paginator->setItemCount($itemsCount);
 
 		return $paginator;
 	}
