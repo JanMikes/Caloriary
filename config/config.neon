@@ -81,7 +81,7 @@ services:
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForAction(%security.acl%)
 	- Caloriary\Infrastructure\Authorization\ACL\HasUserPermissionForActionOnResource
 	- Caloriary\Application\Action\AddUserAction
-	- Caloriary\Infrastructure\Authentication\ReadModel\DQLGetUsersList
+	- Caloriary\Infrastructure\Authentication\ReadModel\DQLGetListOfUsers
 	- Caloriary\Application\Action\SelfUserDetailAction
 	- Caloriary\Infrastructure\Calories\ReadModel\DQLGetListOfCaloricRecordsForUser
 	- Caloriary\Application\Action\AddEntryToSpecificUserAction

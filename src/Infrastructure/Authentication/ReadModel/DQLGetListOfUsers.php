@@ -6,7 +6,7 @@ use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\User;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class DQLGetUsersList implements GetListOfUsers
+final class DQLGetListOfUsers implements GetListOfUsers
 {
 	/**
 	 * @var EntityManagerInterface
