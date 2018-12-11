@@ -13,6 +13,8 @@ use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\PaginationInterface;
+use Nette\Utils\Paginator;
 
 final class ListUsersAction implements ActionHandler
 {
@@ -64,6 +66,12 @@ final class ListUsersAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
+			$paginator = $this->createPaginatorFromRequest($request);
+
+			if ($this->getListOfUsers instanceof PaginationInterface) {
+				$this->getListOfUsers->applyPaginator($paginator);
+			}
+
 			$users = $this->getListOfUsers->__invoke();
 		}
 
@@ -72,11 +80,35 @@ final class ListUsersAction implements ActionHandler
 		}
 
 		// @TODO: transformer for response
-		return $response->withJson(array_map(function(User $user) {
-			return [
-				'email' => $user->emailAddress()->toString(),
-				'dailyLimit' => $user->dailyLimit()->toInteger(),
-			];
-		}, $users), 200);
+		return $response->withJson([
+			'page' => $paginator->getPage(),
+			'limit' => $paginator->getItemsPerPage(),
+			'pages' => $paginator->getPageCount(),
+			'totalCount' => $paginator->getItemCount(),
+			'results' => array_map(function(User $user) {
+				return [
+					'email' => $user->emailAddress()->toString(),
+					'dailyLimit' => $user->dailyLimit()->toInteger(),
+				];
+			}, $users)
+		], 200);
+	}
+
+
+	private function createPaginatorFromRequest(RequestInterface $request): Paginator
+	{
+		// @TODO throw exception when page is out of scope || is not numeric
+		$page = $request->getQueryParam('page', 1);
+
+		// @TODO throw exception when limit is out of scope || is not numeric
+		$itemsPerPage = $request->getQueryParam('limit', 3);
+
+		$paginator = new Paginator();
+
+		$paginator->setPage($page);
+		$paginator->setItemsPerPage($itemsPerPage);
+		$paginator->setItemCount(5);
+
+		return $paginator;
 	}
 }
