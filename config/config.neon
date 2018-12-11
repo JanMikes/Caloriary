@@ -89,8 +89,14 @@ services:
 	- Caloriary\Infrastructure\Calories\ReadModel\CachedQueryHasCaloriesWithinDailyLimit
 	- JanMikes\Nutritionix\Nutritionix(@env::get('NUTRITIONIX_APP_ID'), @env::get('NUTRITIONIX_API_KEY'))
 	- Caloriary\Infrastructure\Calories\ReadModel\GetCaloriesForMealFromNutritionix
+	- Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory(%pagination.maxItemsPerPage%, %pagination.defaultItemsPerPage%)
+	- Caloriary\Infrastructure\Authentication\ReadModel\DQLCountUsers
 
 parameters:
+	pagination:
+		defaultItemsPerPage: 20
+		maxItemsPerPage: 100
+
 	cors:
 		origin: *
 		methods: [GET, POST, PUT, DELETE]

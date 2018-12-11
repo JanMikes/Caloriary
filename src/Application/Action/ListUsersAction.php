@@ -5,6 +5,7 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\User;
@@ -12,9 +13,9 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
+use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
-use Caloriary\PaginationInterface;
-use Nette\Utils\Paginator;
+use Caloriary\Application\Pagination\PaginationAwareQuery;
 
 final class ListUsersAction implements ActionHandler
 {
@@ -38,18 +39,32 @@ final class ListUsersAction implements ActionHandler
 	 */
 	private $getListOfUsers;
 
+	/**
+	 * @var PaginatorFromRequestFactory
+	 */
+	private $paginatorFromRequestFactory;
+
+	/**
+	 * @var CountUsers
+	 */
+	private $countUsers;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
 		GetListOfUsers $getListOfUsers,
-		CanUserPerformAction $canUserPerformAction
+		CanUserPerformAction $canUserPerformAction,
+		PaginatorFromRequestFactory $paginatorFromRequestFactory,
+		CountUsers $countUsers
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->getListOfUsers = $getListOfUsers;
+		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
+		$this->countUsers = $countUsers;
 	}
 
 
@@ -66,13 +81,17 @@ final class ListUsersAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
-			$paginator = $this->createPaginatorFromRequest($request);
+			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers);
 
-			if ($this->getListOfUsers instanceof PaginationInterface) {
+			if ($this->getListOfUsers instanceof PaginationAwareQuery) {
 				$this->getListOfUsers->applyPaginator($paginator);
 			}
 
 			$users = $this->getListOfUsers->__invoke();
+		}
+
+		catch (\InvalidArgumentException $e) {
+			return $this->responseFormatter->formatError($response, $e->getMessage(), 400);
 		}
 
 		catch (RestrictedAccess $e) {
@@ -92,23 +111,5 @@ final class ListUsersAction implements ActionHandler
 				];
 			}, $users)
 		], 200);
-	}
-
-
-	private function createPaginatorFromRequest(RequestInterface $request): Paginator
-	{
-		// @TODO throw exception when page is out of scope || is not numeric
-		$page = $request->getQueryParam('page', 1);
-
-		// @TODO throw exception when limit is out of scope || is not numeric
-		$itemsPerPage = $request->getQueryParam('limit', 3);
-
-		$paginator = new Paginator();
-
-		$paginator->setPage($page);
-		$paginator->setItemsPerPage($itemsPerPage);
-		$paginator->setItemCount(5);
-
-		return $paginator;
 	}
 }

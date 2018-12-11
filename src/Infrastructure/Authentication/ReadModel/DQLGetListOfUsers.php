@@ -4,11 +4,11 @@ namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\User;
-use Caloriary\PaginationInterface;
+use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Doctrine\ORM\EntityManagerInterface;
 use Nette\Utils\Paginator;
 
-final class DQLGetListOfUsers implements GetListOfUsers, PaginationInterface
+final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
 {
 	/**
 	 * @var EntityManagerInterface
