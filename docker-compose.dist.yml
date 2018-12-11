@@ -26,6 +26,8 @@ services:
       DATABASE_HOST: "mysql"
       DATABASE_NAME: "caloriary"
       JWT_SECRET: "myTotallySuperSecretString"
+      NUTRITIONIX_APP_ID: ""
+      NUTRITIONIX_API_KEY: ""
     entrypoint: ["sh", "/wait-for-db.sh"]
     command: ["php-fpm"]
     depends_on:

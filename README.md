@@ -24,6 +24,8 @@ These environment variables are supported:
 - `DATABASE_HOST` (required)
 - `DATABASE_NAME` (required)
 - `JWT_SECRET` (required)
+- `NUTRITIONIX_APP_ID` (required)
+- `NUTRITIONIX_API_KEY` (required)
 
 ### Config file `config/config.local.neon`
 You can create this file and change anything. This is extremely useful for local development, etc disable logging. 
