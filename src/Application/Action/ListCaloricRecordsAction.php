@@ -7,7 +7,6 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Application\Filtering\FilteringAwareQuery;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
-use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
@@ -21,7 +20,7 @@ use Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactor
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
-final class ListEntriesForSpecificUserAction implements ActionHandler
+final class ListCaloricRecordsAction implements ActionHandler
 {
 	/**
 	 * @var ResponseFormatter
@@ -49,14 +48,14 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 	private $hasCaloriesWithinDailyLimit;
 
 	/**
-	 * @var PaginatorFromRequestFactory
-	 */
-	private $paginatorFromRequestFactory;
-
-	/**
 	 * @var CountCaloricRecordsOfUser
 	 */
 	private $countCaloricRecordsOfUser;
+
+	/**
+	 * @var PaginatorFromRequestFactory
+	 */
+	private $paginatorFromRequestFactory;
 
 	/**
 	 * @var QueryFiltersFromRequestFactory
@@ -70,8 +69,8 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 		GetListOfCaloricRecordsForUser $getListOfCaloricRecordsForUser,
 		CanUserPerformAction $canUserPerformAction,
 		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
-		PaginatorFromRequestFactory $paginatorFromRequestFactory,
 		CountCaloricRecordsOfUser $countCaloricRecordsOfUser,
+		PaginatorFromRequestFactory $paginatorFromRequestFactory,
 		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory
 	)
 	{
@@ -80,8 +79,8 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->getListOfCaloricRecordsForUser = $getListOfCaloricRecordsForUser;
 		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
-		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
 		$this->countCaloricRecordsOfUser = $countCaloricRecordsOfUser;
+		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
 		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
 	}
 
@@ -93,10 +92,7 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 			$currentUser = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
-			$user = $this->users->get(
-				EmailAddress::fromString($arguments['email'] ?? '')
-			);
-			$action = UserAction::get(UserAction::LIST_CALORIC_RECORDS_FOR_SPECIFIC_USER);
+			$action = UserAction::get(UserAction::LIST_CALORIC_RECORDS);
 
 			if (! $this->canUserPerformAction->__invoke($currentUser, $action)) {
 				throw new RestrictedAccess();
@@ -110,26 +106,22 @@ final class ListEntriesForSpecificUserAction implements ActionHandler
 
 			$paginator = $this->paginatorFromRequestFactory->create(
 				$request,
-				$this->countCaloricRecordsOfUser->__invoke($user)
+				$this->countCaloricRecordsOfUser->__invoke($currentUser)
 			);
-
-			if ($this->getListOfCaloricRecordsForUser instanceof FilteringAwareQuery) {
-				$this->getListOfCaloricRecordsForUser->applyFiltersForNextQuery($queryFilters);
-			}
 
 			if ($this->getListOfCaloricRecordsForUser instanceof PaginationAwareQuery) {
 				$this->getListOfCaloricRecordsForUser->applyPaginatorForNextQuery($paginator);
 			}
 
-			$records = $this->getListOfCaloricRecordsForUser->__invoke($user);
+			if ($this->getListOfCaloricRecordsForUser instanceof FilteringAwareQuery) {
+				$this->getListOfCaloricRecordsForUser->applyFiltersForNextQuery($queryFilters);
+			}
+
+			$records = $this->getListOfCaloricRecordsForUser->__invoke($currentUser);
 		}
 
 		catch (\InvalidArgumentException $e) {
 			return $this->responseFormatter->formatError($response, $e->getMessage(), 400);
-		}
-
-		catch (UserNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'User not found!', 404);
 		}
 
 		catch (RestrictedAccess $e) {

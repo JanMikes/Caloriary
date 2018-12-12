@@ -5,27 +5,28 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
+use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\EmailAddress;
-use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
-use Caloriary\Calories\Exception\CaloricRecordNotFound;
+use Caloriary\Authorization\ACL\CanUserPerformAction;
+use Caloriary\Authorization\Value\UserAction;
+use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\Exception\MealNotFound;
 use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
 use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
-use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
-use Doctrine\Common\Persistence\ObjectManager;
 
-final class EditEntryAction implements ActionHandler
+final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 {
 	/**
-	 * @var ResponseFormatter
+	 * @var CaloricRecords
 	 */
-	private $responseFormatter;
+	private $caloricRecords;
 
 	/**
 	 * @var Users
@@ -33,64 +34,59 @@ final class EditEntryAction implements ActionHandler
 	private $users;
 
 	/**
-	 * @var CaloricRecords
+	 * @var CanUserPerformAction
 	 */
-	private $caloricRecords;
+	private $canUserPerformAction;
 
 	/**
-	 * @var CanUserPerformActionOnResource
+	 * @var ResponseFormatter
 	 */
-	private $canUserPerformActionOnResource;
-
-	/**
-	 * @var ObjectManager
-	 */
-	private $manager;
-
-	/**
-	 * @var HasCaloriesWithinDailyLimit
-	 */
-	private $hasCaloriesWithinDailyLimit;
+	private $responseFormatter;
 
 	/**
 	 * @var GetCaloriesForMeal
 	 */
 	private $getCaloriesForMeal;
 
+	/**
+	 * @var HasCaloriesWithinDailyLimit
+	 */
+	private $hasCaloriesWithinDailyLimit;
+
 
 	public function __construct(
-		ResponseFormatter $responseFormatter,
-		Users $users,
 		CaloricRecords $caloricRecords,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		ObjectManager $manager,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
-		GetCaloriesForMeal $getCaloriesForMeal
+		Users $users,
+		CanUserPerformAction $canUserPerformAction,
+		ResponseFormatter $responseFormatter,
+		GetCaloriesForMeal $getCaloriesForMeal,
+		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
 	)
 	{
-		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
 		$this->caloricRecords = $caloricRecords;
-		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
-		$this->manager = $manager;
-		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
+		$this->users = $users;
+		$this->canUserPerformAction = $canUserPerformAction;
+		$this->responseFormatter = $responseFormatter;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
+		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
-		// @TODO: Validate body, via middleware?
-		// @TODO: Transform into DTO, so we have strict types
+		$body = $request->getDecodedJsonFromBody();
 
 		try {
-			$body = $request->getDecodedJsonFromBody();
 			// @TODO: get user from attributes (set it via middleware)
 			$currentUser = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
-			$recordId = CaloricRecordId::fromString($arguments['entryId'] ?? '');
-			$caloricRecord = $this->caloricRecords->get($recordId);
+			$user = $this->users->get(
+				EmailAddress::fromString($arguments['email'] ?? '')
+			);
+
+			$this->ensureUserCanAddCaloricRecordToAnotherUser($currentUser);
+
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
@@ -105,23 +101,22 @@ final class EditEntryAction implements ActionHandler
 				$calories = $this->getCaloriesForMeal->__invoke($meal);
 			}
 
-			$caloricRecord->edit(
+			$record = CaloricRecord::create(
+				$this->caloricRecords->nextIdentity(),
+				$user,
 				$calories,
 				$ateAt,
 				$meal,
-				$currentUser,
-				$this->canUserPerformActionOnResource
+				$this->canUserPerformAction
 			);
-
-			$this->manager->flush();
 		}
 
 		catch (\InvalidArgumentException $e) {
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
-		catch (CaloricRecordNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'Caloric record not found!', 404);
+		catch (UserNotFound $e) {
+			return $this->responseFormatter->formatError($response, 'User not found!', 404);
 		}
 
 		catch (RestrictedAccess $e) {
@@ -132,14 +127,29 @@ final class EditEntryAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
+		$this->caloricRecords->add($record);
+
 		// @TODO: transformer for response
 		return $response->withJson([
-			'id' => $caloricRecord->id()->toString(),
-			'date' => $caloricRecord->ateAt()->format('Y-m-d'),
-			'time' => $caloricRecord->ateAt()->format('H:i'),
-			'text' => $caloricRecord->text()->toString(),
-			'calories' => $caloricRecord->calories()->toInteger(),
-			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($caloricRecord),
-		], 200);
+			'id' => $record->id()->toString(),
+			'date' => $record->ateAt()->format('Y-m-d'),
+			'time' => $record->ateAt()->format('H:i'),
+			'calories' => $record->calories()->toInteger(),
+			'text' => $record->text()->toString(),
+			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
+		], 201);
+	}
+
+
+	/**
+	 * @param User $currentUser
+	 */
+	private function ensureUserCanAddCaloricRecordToAnotherUser(User $currentUser): void
+	{
+		$action = UserAction::get(UserAction::ADD_CALORIC_RECORD_TO_SPECIFIC_USER);
+
+		if (!$this->canUserPerformAction->__invoke($currentUser, $action)) {
+			throw new RestrictedAccess();
+		}
 	}
 }

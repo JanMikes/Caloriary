@@ -5,13 +5,10 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
-use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
-use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\Exception\MealNotFound;
 use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
@@ -21,7 +18,7 @@ use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
-final class AddEntryToSpecificUserAction implements ActionHandler
+final class AddCaloricRecordAction implements ActionHandler
 {
 	/**
 	 * @var CaloricRecords
@@ -44,14 +41,14 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 	private $responseFormatter;
 
 	/**
-	 * @var GetCaloriesForMeal
-	 */
-	private $getCaloriesForMeal;
-
-	/**
 	 * @var HasCaloriesWithinDailyLimit
 	 */
 	private $hasCaloriesWithinDailyLimit;
+
+	/**
+	 * @var GetCaloriesForMeal
+	 */
+	private $getCaloriesForMeal;
 
 
 	public function __construct(
@@ -59,16 +56,16 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 		Users $users,
 		CanUserPerformAction $canUserPerformAction,
 		ResponseFormatter $responseFormatter,
-		GetCaloriesForMeal $getCaloriesForMeal,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
+		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
+		GetCaloriesForMeal $getCaloriesForMeal
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->responseFormatter = $responseFormatter;
-		$this->getCaloriesForMeal = $getCaloriesForMeal;
 		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
+		$this->getCaloriesForMeal = $getCaloriesForMeal;
 	}
 
 
@@ -78,15 +75,9 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 
 		try {
 			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
+			$user = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
-			$user = $this->users->get(
-				EmailAddress::fromString($arguments['email'] ?? '')
-			);
-
-			$this->ensureUserCanAddCaloricRecordToAnotherUser($currentUser);
-
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
@@ -115,10 +106,6 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
-		catch (UserNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'User not found!', 404);
-		}
-
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
@@ -138,18 +125,5 @@ final class AddEntryToSpecificUserAction implements ActionHandler
 			'text' => $record->text()->toString(),
 			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
 		], 201);
-	}
-
-
-	/**
-	 * @param User $currentUser
-	 */
-	private function ensureUserCanAddCaloricRecordToAnotherUser(User $currentUser): void
-	{
-		$action = UserAction::get(UserAction::ADD_CALORIC_RECORD_TO_SPECIFIC_USER);
-
-		if (!$this->canUserPerformAction->__invoke($currentUser, $action)) {
-			throw new RestrictedAccess();
-		}
 	}
 }

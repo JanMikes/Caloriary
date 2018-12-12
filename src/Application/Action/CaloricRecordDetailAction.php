@@ -16,7 +16,7 @@ use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
-final class EntryDetailAction implements ActionHandler
+final class CaloricRecordDetailAction implements ActionHandler
 {
 	/**
 	 * @var ResponseFormatter
@@ -67,7 +67,7 @@ final class EntryDetailAction implements ActionHandler
 			$currentUser = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
-			$recordId = CaloricRecordId::fromString($arguments['entryId'] ?? '');
+			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
 			$caloricRecord = $this->caloricRecords->get($recordId);
 			$action = UserAction::get(UserAction::CALORIC_RECORD_DETAIL);
 

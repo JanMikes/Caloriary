@@ -15,7 +15,7 @@ use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
-final class DeleteEntryAction implements ActionHandler
+final class DeleteCaloricRecordAction implements ActionHandler
 {
 	/**
 	 * @var ResponseFormatter
@@ -59,7 +59,7 @@ final class DeleteEntryAction implements ActionHandler
 			$currentUser = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
-			$recordId = CaloricRecordId::fromString($arguments['entryId'] ?? '');
+			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
 			$caloricRecord = $this->caloricRecords->get($recordId);
 			$action = UserAction::get(UserAction::DELETE_CALORIC_RECORD);
 

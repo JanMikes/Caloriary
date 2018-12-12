@@ -71,11 +71,11 @@ services:
 	- Caloriary\Application\Action\UserDetailAction
 	- Caloriary\Application\Action\EditUserAction
 	- Caloriary\Application\Action\DeleteUserAction
-	- Caloriary\Application\Action\ListEntriesAction
-	- Caloriary\Application\Action\AddEntryAction
-	- Caloriary\Application\Action\EntryDetailAction
-	- Caloriary\Application\Action\EditEntryAction
-	- Caloriary\Application\Action\DeleteEntryAction
+	- Caloriary\Application\Action\ListCaloricRecordsAction
+	- Caloriary\Application\Action\AddCaloricRecordAction
+	- Caloriary\Application\Action\CaloricRecordDetailAction
+	- Caloriary\Application\Action\EditCaloricRecordAction
+	- Caloriary\Application\Action\DeleteCaloricRecordAction
 	- Caloriary\Infrastructure\Application\Response\ResponseFormatter
 	- Tuupola\Middleware\CorsMiddleware(%cors%)
 	- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
@@ -90,8 +90,8 @@ services:
 	- Caloriary\Infrastructure\Authentication\ReadModel\DQLGetListOfUsers
 	- Caloriary\Application\Action\SelfUserDetailAction
 	- Caloriary\Infrastructure\Calories\ReadModel\DQLGetListOfCaloricRecordsForUser
-	- Caloriary\Application\Action\AddEntryToSpecificUserAction
-	- Caloriary\Application\Action\ListEntriesForSpecificUserAction
+	- Caloriary\Application\Action\AddCaloricRecordToSpecificUserAction
+	- Caloriary\Application\Action\ListCaloricRecordsForSpecificUserAction
 	- Caloriary\Infrastructure\Calories\ReadModel\CachedQueryHasCaloriesWithinDailyLimit
 	- JanMikes\Nutritionix\Nutritionix(@env::get('NUTRITIONIX_APP_ID'), @env::get('NUTRITIONIX_API_KEY'))
 	- Caloriary\Infrastructure\Calories\ReadModel\GetCaloriesForMealFromNutritionix
@@ -108,7 +108,7 @@ parameters:
 	cors:
 		origin: *
 		methods: [GET, POST, PUT, DELETE]
-		headers.allow: [X-Requested-With, X-Authorization, Accept, Content-Type, Origin, Accept-Language]
+		headers.allow: [X-Requested-With, Authorization, Accept, Content-Type, Origin, Accept-Language]
 
 	jwt:
 		validForSeconds: 86400 # 24 hours
@@ -182,27 +182,27 @@ parameters:
 						delete:
 							service: Caloriary\Application\Action\DeleteUserAction
 
-					/entries:
+					/caloric-records:
 						get:
-							service: Caloriary\Application\Action\ListEntriesAction
+							service: Caloriary\Application\Action\ListCaloricRecordsAction
 
 						post:
-							service: Caloriary\Application\Action\AddEntryAction
+							service: Caloriary\Application\Action\AddCaloricRecordAction
 
-					"/entries/{entryId}":
+					"/caloric-records/{caloricRecordId}":
 						get:
-							service: Caloriary\Application\Action\EntryDetailAction
+							service: Caloriary\Application\Action\CaloricRecordDetailAction
 
 						put:
-							service: Caloriary\Application\Action\EditEntryAction
+							service: Caloriary\Application\Action\EditCaloricRecordAction
 
 						delete:
-							service: Caloriary\Application\Action\DeleteEntryAction
+							service: Caloriary\Application\Action\DeleteCaloricRecordAction
 
 
-					"/users/{email}/entries":
+					"/users/{email}/caloric-records":
 						get:
-							service: Caloriary\Application\Action\ListEntriesForSpecificUserAction
+							service: Caloriary\Application\Action\ListCaloricRecordsForSpecificUserAction
 
 						post:
-							service: Caloriary\Application\Action\AddEntryToSpecificUserAction
+							service: Caloriary\Application\Action\AddCaloricRecordToSpecificUserAction

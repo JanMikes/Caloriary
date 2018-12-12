@@ -53,10 +53,9 @@ final class RegisterUserAction implements ActionHandler
 		try {
 			$emailAddress = EmailAddress::fromString($body->email ?? '');
 			$password = ClearTextPassword::fromString($body->password ?? '');
+			$user = User::register($emailAddress, $password, $this->isEmailRegistered);
 
-			$this->users->add(
-				User::register($emailAddress, $password, $this->isEmailRegistered)
-			);
+			$this->users->add($user);
 		}
 
 		catch (\InvalidArgumentException $e) {

@@ -7,23 +7,25 @@ use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
+use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
-use Caloriary\Authorization\ACL\CanUserPerformAction;
-use Caloriary\Calories\CaloricRecord;
+use Caloriary\Calories\Exception\CaloricRecordNotFound;
 use Caloriary\Calories\Exception\MealNotFound;
 use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
 use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
+use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Doctrine\Common\Persistence\ObjectManager;
 
-final class AddEntryAction implements ActionHandler
+final class EditCaloricRecordAction implements ActionHandler
 {
 	/**
-	 * @var CaloricRecords
+	 * @var ResponseFormatter
 	 */
-	private $caloricRecords;
+	private $responseFormatter;
 
 	/**
 	 * @var Users
@@ -31,14 +33,19 @@ final class AddEntryAction implements ActionHandler
 	private $users;
 
 	/**
-	 * @var CanUserPerformAction
+	 * @var CaloricRecords
 	 */
-	private $canUserPerformAction;
+	private $caloricRecords;
 
 	/**
-	 * @var ResponseFormatter
+	 * @var CanUserPerformActionOnResource
 	 */
-	private $responseFormatter;
+	private $canUserPerformActionOnResource;
+
+	/**
+	 * @var ObjectManager
+	 */
+	private $manager;
 
 	/**
 	 * @var HasCaloriesWithinDailyLimit
@@ -52,18 +59,20 @@ final class AddEntryAction implements ActionHandler
 
 
 	public function __construct(
-		CaloricRecords $caloricRecords,
-		Users $users,
-		CanUserPerformAction $canUserPerformAction,
 		ResponseFormatter $responseFormatter,
+		Users $users,
+		CaloricRecords $caloricRecords,
+		CanUserPerformActionOnResource $canUserPerformActionOnResource,
+		ObjectManager $manager,
 		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
 		GetCaloriesForMeal $getCaloriesForMeal
 	)
 	{
-		$this->caloricRecords = $caloricRecords;
-		$this->users = $users;
-		$this->canUserPerformAction = $canUserPerformAction;
 		$this->responseFormatter = $responseFormatter;
+		$this->users = $users;
+		$this->caloricRecords = $caloricRecords;
+		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
+		$this->manager = $manager;
 		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
 	}
@@ -71,13 +80,17 @@ final class AddEntryAction implements ActionHandler
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
-		$body = $request->getDecodedJsonFromBody();
+		// @TODO: Validate body, via middleware?
+		// @TODO: Transform into DTO, so we have strict types
 
 		try {
+			$body = $request->getDecodedJsonFromBody();
 			// @TODO: get user from attributes (set it via middleware)
-			$user = $this->users->get(
+			$currentUser = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
+			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
+			$caloricRecord = $this->caloricRecords->get($recordId);
 			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
@@ -92,18 +105,23 @@ final class AddEntryAction implements ActionHandler
 				$calories = $this->getCaloriesForMeal->__invoke($meal);
 			}
 
-			$record = CaloricRecord::create(
-				$this->caloricRecords->nextIdentity(),
-				$user,
+			$caloricRecord->edit(
 				$calories,
 				$ateAt,
 				$meal,
-				$this->canUserPerformAction
+				$currentUser,
+				$this->canUserPerformActionOnResource
 			);
+
+			$this->manager->flush();
 		}
 
 		catch (\InvalidArgumentException $e) {
 			return $this->responseFormatter->formatError($response, $e->getMessage());
+		}
+
+		catch (CaloricRecordNotFound $e) {
+			return $this->responseFormatter->formatError($response, 'Caloric record not found!', 404);
 		}
 
 		catch (RestrictedAccess $e) {
@@ -114,16 +132,14 @@ final class AddEntryAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
-		$this->caloricRecords->add($record);
-
 		// @TODO: transformer for response
 		return $response->withJson([
-			'id' => $record->id()->toString(),
-			'date' => $record->ateAt()->format('Y-m-d'),
-			'time' => $record->ateAt()->format('H:i'),
-			'calories' => $record->calories()->toInteger(),
-			'text' => $record->text()->toString(),
-			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
-		], 201);
+			'id' => $caloricRecord->id()->toString(),
+			'date' => $caloricRecord->ateAt()->format('Y-m-d'),
+			'time' => $caloricRecord->ateAt()->format('H:i'),
+			'text' => $caloricRecord->text()->toString(),
+			'calories' => $caloricRecord->calories()->toInteger(),
+			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($caloricRecord),
+		], 200);
 	}
 }
