@@ -12,6 +12,7 @@ use Caloriary\Authentication\Token\IssueToken;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class LoginAction implements ActionHandler
 {
@@ -30,16 +31,23 @@ final class LoginAction implements ActionHandler
 	 */
 	private $issueToken;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
 
 	public function __construct(
 		Users $users,
 		ResponseFormatter $responseFormatter,
-		IssueToken $issueToken
+		IssueToken $issueToken,
+		UserResponseTransformer $userResponseTransformer
 	)
 	{
 		$this->users = $users;
 		$this->responseFormatter = $responseFormatter;
 		$this->issueToken = $issueToken;
+		$this->userResponseTransformer = $userResponseTransformer;
 	}
 
 
@@ -70,16 +78,17 @@ final class LoginAction implements ActionHandler
 			return $this->createAuthenticationFailedResponse($response);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'success' => true,
-			'token' => $this->issueToken->__invoke($emailAddress, $request->getUri()->getHost()),
-		], 201);
+		$token = $this->issueToken->__invoke($emailAddress, $request->getUri()->getHost());
+
+		return $response->withJson(
+			$this->userResponseTransformer->toArray($user) + ['token' => $token],
+			201
+		);
 	}
 
 
 	private function createAuthenticationFailedResponse(ResponseInterface $response): ResponseInterface
 	{
-		return $this->responseFormatter->formatError($response, 'Authentication failed - Invalid combination of credentials', 401);
+		return $this->responseFormatter->formatError($response, 'Invalid combination of credentials', 401);
 	}
 }

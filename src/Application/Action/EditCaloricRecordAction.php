@@ -12,11 +12,11 @@ use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\Exception\CaloricRecordNotFound;
 use Caloriary\Calories\Exception\MealNotFound;
 use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
-use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
+use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -48,14 +48,14 @@ final class EditCaloricRecordAction implements ActionHandler
 	private $manager;
 
 	/**
-	 * @var HasCaloriesWithinDailyLimit
-	 */
-	private $hasCaloriesWithinDailyLimit;
-
-	/**
 	 * @var GetCaloriesForMeal
 	 */
 	private $getCaloriesForMeal;
+
+	/**
+	 * @var CaloricRecordResponseTransformer
+	 */
+	private $caloricRecordResponseTransformer;
 
 
 	public function __construct(
@@ -64,8 +64,8 @@ final class EditCaloricRecordAction implements ActionHandler
 		CaloricRecords $caloricRecords,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
 		ObjectManager $manager,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
-		GetCaloriesForMeal $getCaloriesForMeal
+		GetCaloriesForMeal $getCaloriesForMeal,
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -73,8 +73,8 @@ final class EditCaloricRecordAction implements ActionHandler
 		$this->caloricRecords = $caloricRecords;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->manager = $manager;
-		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
+		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
 	}
 
 
@@ -132,14 +132,6 @@ final class EditCaloricRecordAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'id' => $caloricRecord->id()->toString(),
-			'date' => $caloricRecord->ateAt()->format('Y-m-d'),
-			'time' => $caloricRecord->ateAt()->format('H:i'),
-			'text' => $caloricRecord->text()->toString(),
-			'calories' => $caloricRecord->calories()->toInteger(),
-			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($caloricRecord),
-		], 200);
+		return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
 	}
 }

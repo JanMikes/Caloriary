@@ -12,6 +12,7 @@ use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class UserDetailAction implements ActionHandler
 {
@@ -30,16 +31,23 @@ final class UserDetailAction implements ActionHandler
 	 */
 	private $canUserPerformActionOnResource;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource
+		CanUserPerformActionOnResource $canUserPerformActionOnResource,
+		UserResponseTransformer $userResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
+		$this->userResponseTransformer = $userResponseTransformer;
 	}
 
 
@@ -72,10 +80,6 @@ final class UserDetailAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'email' => $user->emailAddress()->toString(),
-			'dailyLimit' => $user->dailyLimit()->toInteger(),
-		], 200);
+		return $response->withJson($this->userResponseTransformer->toArray($user), 200);
 	}
 }

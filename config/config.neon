@@ -99,6 +99,8 @@ services:
 	- Caloriary\Infrastructure\Authentication\ReadModel\DQLCountUsers
 	- Caloriary\Infrastructure\Calories\ReadModel\DQLCountCaloricRecordsOfUser
 	- Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory
+	- Caloriary\Infrastructure\Application\Response\UserResponseTransformer
+	- Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer
 
 parameters:
 	pagination:

@@ -11,9 +11,9 @@ use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Calories\Exception\CaloricRecordNotFound;
-use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
+use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
 final class CaloricRecordDetailAction implements ActionHandler
@@ -39,9 +39,9 @@ final class CaloricRecordDetailAction implements ActionHandler
 	private $canUserPerformActionOnResource;
 
 	/**
-	 * @var HasCaloriesWithinDailyLimit
+	 * @var CaloricRecordResponseTransformer
 	 */
-	private $hasCaloriesWithinDailyLimit;
+	private $caloricRecordResponseTransformer;
 
 
 	public function __construct(
@@ -49,14 +49,14 @@ final class CaloricRecordDetailAction implements ActionHandler
 		Users $users,
 		CaloricRecords $caloricRecords,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->caloricRecords = $caloricRecords;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
-		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
+		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
 	}
 
 
@@ -88,14 +88,6 @@ final class CaloricRecordDetailAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'id' => $caloricRecord->id()->toString(),
-			'date' => $caloricRecord->ateAt()->format('Y-m-d'),
-			'time' => $caloricRecord->ateAt()->format('H:i'),
-			'text' => $caloricRecord->text()->toString(),
-			'calories' => $caloricRecord->calories()->toInteger(),
-			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($caloricRecord),
-		], 200);
+		return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
 	}
 }

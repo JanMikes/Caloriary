@@ -15,6 +15,7 @@ use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\Value\DailyCaloriesLimit;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class AddUserAction implements ActionHandler
 {
@@ -38,18 +39,25 @@ final class AddUserAction implements ActionHandler
 	 */
 	private $canUserPerformAction;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		IsEmailRegistered $isEmailRegistered,
 		Users $users,
-		CanUserPerformAction $canUserPerformAction
+		CanUserPerformAction $canUserPerformAction,
+		UserResponseTransformer $userResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->isEmailRegistered = $isEmailRegistered;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
+		$this->userResponseTransformer = $userResponseTransformer;
 	}
 
 
@@ -68,16 +76,16 @@ final class AddUserAction implements ActionHandler
 			$password = ClearTextPassword::fromString($body->password ?? '');
 			$dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);
 
-			$this->users->add(
-				User::createByAdmin(
-					$emailAddress,
-					$password,
-					$dailyLimit,
-					$currentUser,
-					$this->isEmailRegistered,
-					$this->canUserPerformAction
-				)
+			$user = User::createByAdmin(
+				$emailAddress,
+				$password,
+				$dailyLimit,
+				$currentUser,
+				$this->isEmailRegistered,
+				$this->canUserPerformAction
 			);
+
+			$this->users->add($user);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -94,9 +102,6 @@ final class AddUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'success' => true,
-		], 201);
+		return $response->withJson($this->userResponseTransformer->toArray($user), 201);
 	}
 }

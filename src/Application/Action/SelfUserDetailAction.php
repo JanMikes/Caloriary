@@ -9,6 +9,7 @@ use Caloriary\Authentication\Exception\UserNotFound;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class SelfUserDetailAction implements ActionHandler
 {
@@ -22,14 +23,21 @@ final class SelfUserDetailAction implements ActionHandler
 	 */
 	private $users;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
-		Users $users
+		Users $users,
+		UserResponseTransformer $userResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
+		$this->userResponseTransformer = $userResponseTransformer;
 	}
 
 
@@ -50,10 +58,6 @@ final class SelfUserDetailAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'User not found!', 404);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'email' => $currentUser->emailAddress()->toString(),
-			'dailyLimit' => $currentUser->dailyLimit()->toInteger(),
-		], 200);
+		return $response->withJson($this->userResponseTransformer->toArray($currentUser), 200);
 	}
 }

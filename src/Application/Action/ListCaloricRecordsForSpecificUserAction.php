@@ -13,12 +13,12 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
-use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\ReadModel\CountCaloricRecordsOfUser;
 use Caloriary\Calories\ReadModel\GetListOfCaloricRecordsForUser;
-use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory;
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
+use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
+use Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
 final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
@@ -44,11 +44,6 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 	private $getListOfCaloricRecordsForUser;
 
 	/**
-	 * @var HasCaloriesWithinDailyLimit
-	 */
-	private $hasCaloriesWithinDailyLimit;
-
-	/**
 	 * @var PaginatorFromRequestFactory
 	 */
 	private $paginatorFromRequestFactory;
@@ -63,26 +58,38 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 	 */
 	private $queryFiltersFromRequestFactory;
 
+	/**
+	 * @var PaginatorResponseTransformer
+	 */
+	private $paginatorResponseTransformer;
+
+	/**
+	 * @var CaloricRecordResponseTransformer
+	 */
+	private $caloricRecordResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
 		GetListOfCaloricRecordsForUser $getListOfCaloricRecordsForUser,
 		CanUserPerformAction $canUserPerformAction,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
 		PaginatorFromRequestFactory $paginatorFromRequestFactory,
 		CountCaloricRecordsOfUser $countCaloricRecordsOfUser,
-		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory
+		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory,
+		PaginatorResponseTransformer $paginatorResponseTransformer,
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->getListOfCaloricRecordsForUser = $getListOfCaloricRecordsForUser;
-		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
 		$this->countCaloricRecordsOfUser = $countCaloricRecordsOfUser;
 		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
+		$this->paginatorResponseTransformer = $paginatorResponseTransformer;
+		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
 	}
 
 
@@ -121,7 +128,7 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 				$this->getListOfCaloricRecordsForUser->applyPaginatorForNextQuery($paginator);
 			}
 
-			$records = $this->getListOfCaloricRecordsForUser->__invoke($user);
+			$caloricRecords = $this->getListOfCaloricRecordsForUser->__invoke($user);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -136,22 +143,11 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'page' => $paginator->getPage(),
-			'limit' => $paginator->getItemsPerPage(),
-			'pages' => $paginator->getPageCount(),
-			'totalCount' => $paginator->getItemCount(),
-			'results' => array_map(function(CaloricRecord $record) {
-				return [
-					'id' => $record->id()->toString(),
-					'date' => $record->ateAt()->format('Y-m-d'),
-					'time' => $record->ateAt()->format('H:i'),
-					'text' => $record->text()->toString(),
-					'calories' => $record->calories()->toInteger(),
-					'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
-				];
-			}, $records)
-		], 200);
+		return $response->withJson(
+			$this->paginatorResponseTransformer->toArray($paginator) + [
+				'results' => array_map([$this->caloricRecordResponseTransformer, 'toArray'], $caloricRecords)
+			],
+			200
+		);
 	}
 }

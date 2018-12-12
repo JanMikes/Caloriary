@@ -12,6 +12,7 @@ use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\ClearTextPassword;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class RegisterUserAction implements ActionHandler
 {
@@ -30,16 +31,23 @@ final class RegisterUserAction implements ActionHandler
 	 */
 	private $users;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		IsEmailRegistered $isEmailRegistered,
-		Users $users
+		Users $users,
+		UserResponseTransformer $userResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->isEmailRegistered = $isEmailRegistered;
 		$this->users = $users;
+		$this->userResponseTransformer = $userResponseTransformer;
 	}
 
 
@@ -68,9 +76,6 @@ final class RegisterUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $message);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'success' => true,
-		], 201);
+		return $response->withJson($this->userResponseTransformer->toArray($user), 201);
 	}
 }

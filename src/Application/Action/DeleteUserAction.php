@@ -74,7 +74,6 @@ final class DeleteUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
 		return $response->withJson([
 			'success' => true,
 		], 200);

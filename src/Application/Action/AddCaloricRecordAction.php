@@ -12,10 +12,10 @@ use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\Exception\MealNotFound;
 use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
-use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
+use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
 final class AddCaloricRecordAction implements ActionHandler
@@ -41,14 +41,14 @@ final class AddCaloricRecordAction implements ActionHandler
 	private $responseFormatter;
 
 	/**
-	 * @var HasCaloriesWithinDailyLimit
-	 */
-	private $hasCaloriesWithinDailyLimit;
-
-	/**
 	 * @var GetCaloriesForMeal
 	 */
 	private $getCaloriesForMeal;
+
+	/**
+	 * @var CaloricRecordResponseTransformer
+	 */
+	private $caloricRecordResponseTransformer;
 
 
 	public function __construct(
@@ -56,16 +56,16 @@ final class AddCaloricRecordAction implements ActionHandler
 		Users $users,
 		CanUserPerformAction $canUserPerformAction,
 		ResponseFormatter $responseFormatter,
-		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
-		GetCaloriesForMeal $getCaloriesForMeal
+		GetCaloriesForMeal $getCaloriesForMeal,
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->responseFormatter = $responseFormatter;
-		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
+		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
 	}
 
 
@@ -92,7 +92,7 @@ final class AddCaloricRecordAction implements ActionHandler
 				$calories = $this->getCaloriesForMeal->__invoke($meal);
 			}
 
-			$record = CaloricRecord::create(
+			$caloricRecord = CaloricRecord::create(
 				$this->caloricRecords->nextIdentity(),
 				$user,
 				$calories,
@@ -114,16 +114,8 @@ final class AddCaloricRecordAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
 
-		$this->caloricRecords->add($record);
+		$this->caloricRecords->add($caloricRecord);
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'id' => $record->id()->toString(),
-			'date' => $record->ateAt()->format('Y-m-d'),
-			'time' => $record->ateAt()->format('H:i'),
-			'calories' => $record->calories()->toInteger(),
-			'text' => $record->text()->toString(),
-			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
-		], 201);
+		return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 201);
 	}
 }

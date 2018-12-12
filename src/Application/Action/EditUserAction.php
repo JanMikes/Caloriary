@@ -12,6 +12,7 @@ use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\Value\DailyCaloriesLimit;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 use Doctrine\Common\Persistence\ObjectManager;
 
 final class EditUserAction implements ActionHandler
@@ -36,18 +37,25 @@ final class EditUserAction implements ActionHandler
 	 */
 	private $manager;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		ObjectManager $manager
+		ObjectManager $manager,
+		UserResponseTransformer $userResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->manager = $manager;
+		$this->userResponseTransformer = $userResponseTransformer;
 	}
 
 
@@ -92,10 +100,6 @@ final class EditUserAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'email' => $user->emailAddress()->toString(),
-			'dailyLimit' => $user->dailyLimit()->toInteger(),
-		], 200);
+		return $response->withJson($this->userResponseTransformer->toArray($user), 200);
 	}
 }

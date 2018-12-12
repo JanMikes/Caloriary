@@ -17,8 +17,10 @@ use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory;
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
+use Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
+use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class ListUsersAction implements ActionHandler
 {
@@ -57,6 +59,16 @@ final class ListUsersAction implements ActionHandler
 	 */
 	private $queryFiltersFromRequestFactory;
 
+	/**
+	 * @var UserResponseTransformer
+	 */
+	private $userResponseTransformer;
+
+	/**
+	 * @var PaginatorResponseTransformer
+	 */
+	private $paginatorResponseTransformer;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -65,7 +77,9 @@ final class ListUsersAction implements ActionHandler
 		CanUserPerformAction $canUserPerformAction,
 		PaginatorFromRequestFactory $paginatorFromRequestFactory,
 		CountUsers $countUsers,
-		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory
+		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory,
+		UserResponseTransformer $userResponseTransformer,
+		PaginatorResponseTransformer $paginatorResponseTransformer
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -75,6 +89,8 @@ final class ListUsersAction implements ActionHandler
 		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
 		$this->countUsers = $countUsers;
 		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
+		$this->userResponseTransformer = $userResponseTransformer;
+		$this->paginatorResponseTransformer = $paginatorResponseTransformer;
 	}
 
 
@@ -122,18 +138,11 @@ final class ListUsersAction implements ActionHandler
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
 
-		// @TODO: transformer for response
-		return $response->withJson([
-			'page' => $paginator->getPage(),
-			'limit' => $paginator->getItemsPerPage(),
-			'pages' => $paginator->getPageCount(),
-			'totalCount' => $paginator->getItemCount(),
-			'results' => array_map(function(User $user) {
-				return [
-					'email' => $user->emailAddress()->toString(),
-					'dailyLimit' => $user->dailyLimit()->toInteger(),
-				];
-			}, $users)
-		], 200);
+		return $response->withJson(
+			$this->paginatorResponseTransformer->toArray($paginator) + [
+				'results' => array_map([$this->userResponseTransformer, 'toArray'], $users)
+			],
+		200
+		);
 	}
 }
