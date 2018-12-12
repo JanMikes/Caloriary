@@ -91,7 +91,7 @@ final class EditCaloricRecordAction implements ActionHandler
 			);
 			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
 			$caloricRecord = $this->caloricRecords->get($recordId);
-			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
+			$ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
 				throw new \InvalidArgumentException('Invalid date provided!');

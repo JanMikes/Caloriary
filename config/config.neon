@@ -101,6 +101,7 @@ services:
 	- Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory
 	- Caloriary\Infrastructure\Application\Response\UserResponseTransformer
 	- Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer
+	- Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer
 
 parameters:
 	pagination:

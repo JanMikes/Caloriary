@@ -78,7 +78,7 @@ final class AddCaloricRecordAction implements ActionHandler
 			$user = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
-			$ateAt = \DateTimeImmutable::createFromFormat(DATE_ATOM, $body->date ?? '');
+			$ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
 				throw new \InvalidArgumentException('Invalid date provided!');
