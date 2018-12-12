@@ -4,23 +4,20 @@ namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
 use Caloriary\Application\Filtering\FilteringAwareQuery;
-use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\User;
+use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 
 final class DQLCountUsers implements CountUsers, FilteringAwareQuery
 {
+	use DQLFiltering;
+
 	/**
 	 * @var EntityManagerInterface
 	 */
 	private $entityManager;
-
-	/**
-	 * @var QueryFilters|null
-	 */
-	private $filters;
 
 
 	public function __construct(EntityManagerInterface $entityManager)
@@ -36,13 +33,7 @@ final class DQLCountUsers implements CountUsers, FilteringAwareQuery
 			->select('COUNT(user.emailAddress)');
 
 		try {
-			if ($this->filters) {
-				$builder->andWhere($this->filters->dql());
-				$builder->setParameters($this->filters->parameters());
-
-				// This should prevent bugs, filters will be valid only for next Query
-				$this->filters = null;
-			}
+			$this->applyFiltersToQueryBuilder($builder);
 
 			return (int) $builder
 				->getQuery()
@@ -51,11 +42,5 @@ final class DQLCountUsers implements CountUsers, FilteringAwareQuery
 		} catch (QueryException $e) {
 			throw InvalidFilterQuery::fromQueryException($e);
 		}
-	}
-
-
-	public function applyFiltersForNextQuery(QueryFilters $filters): void
-	{
-		$this->filters = $filters;
 	}
 }

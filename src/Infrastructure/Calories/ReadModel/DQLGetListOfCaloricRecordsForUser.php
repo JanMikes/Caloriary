@@ -2,24 +2,24 @@
 
 namespace Caloriary\Infrastructure\Calories\ReadModel;
 
+use Caloriary\Application\Filtering\FilteringAwareQuery;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Caloriary\Authentication\User;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\ReadModel\GetListOfCaloricRecordsForUser;
+use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
+use Caloriary\Infrastructure\Application\Pagination\DQLPagination;
 use Doctrine\ORM\EntityManagerInterface;
-use Nette\Utils\Paginator;
 
-final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecordsForUser, PaginationAwareQuery
+final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecordsForUser, PaginationAwareQuery, FilteringAwareQuery
 {
+	use DQLPagination;
+	use DQLFiltering;
+
 	/**
 	 * @var EntityManagerInterface
 	 */
 	private $entityManager;
-
-	/**
-	 * @var Paginator|null
-	 */
-	private $paginator;
 
 
 	public function __construct(EntityManagerInterface $entityManager)
@@ -29,8 +29,6 @@ final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecords
 
 
 	/**
-	 * @todo: filtering
-	 *
 	 * @return CaloricRecord[]
 	 */
 	public function __invoke(User $user): array
@@ -42,21 +40,9 @@ final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecords
 			->setParameter('user', $user)
 			->orderBy('record.ateAt', 'DESC');
 
-		if ($this->paginator) {
-			$builder
-				->setMaxResults($this->paginator->getItemsPerPage())
-				->setFirstResult($this->paginator->getOffset());
-
-			// This should prevent bugs, pagination will be valid only for single Query
-			$this->paginator = null;
-		}
+		$this->applyFiltersToQueryBuilder($builder);
+		$this->applyPaginationToQueryBuilder($builder);
 
 		return $builder->getQuery()->getResult();
-	}
-
-
-	public function applyPaginatorForNextQuery(Paginator $paginator): void
-	{
-		$this->paginator = $paginator;
 	}
 }

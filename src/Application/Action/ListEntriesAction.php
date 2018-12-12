@@ -5,6 +5,7 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use Caloriary\Application\Filtering\FilteringAwareQuery;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
@@ -15,6 +16,7 @@ use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\ReadModel\CountCaloricRecordsOfUser;
 use Caloriary\Calories\ReadModel\GetListOfCaloricRecordsForUser;
 use Caloriary\Calories\ReadModel\HasCaloriesWithinDailyLimit;
+use Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory;
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 
@@ -55,6 +57,11 @@ final class ListEntriesAction implements ActionHandler
 	 */
 	private $paginatorFromRequestFactory;
 
+	/**
+	 * @var QueryFiltersFromRequestFactory
+	 */
+	private $queryFiltersFromRequestFactory;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -63,7 +70,8 @@ final class ListEntriesAction implements ActionHandler
 		CanUserPerformAction $canUserPerformAction,
 		HasCaloriesWithinDailyLimit $hasCaloriesWithinDailyLimit,
 		CountCaloricRecordsOfUser $countCaloricRecordsOfUser,
-		PaginatorFromRequestFactory $paginatorFromRequestFactory
+		PaginatorFromRequestFactory $paginatorFromRequestFactory,
+		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -73,6 +81,7 @@ final class ListEntriesAction implements ActionHandler
 		$this->hasCaloriesWithinDailyLimit = $hasCaloriesWithinDailyLimit;
 		$this->countCaloricRecordsOfUser = $countCaloricRecordsOfUser;
 		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
+		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
 	}
 
 
@@ -89,6 +98,12 @@ final class ListEntriesAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
+			$queryFilters = $this->queryFiltersFromRequestFactory->create($request);
+
+			if ($this->countCaloricRecordsOfUser instanceof FilteringAwareQuery) {
+				$this->countCaloricRecordsOfUser->applyFiltersForNextQuery($queryFilters);
+			}
+
 			$paginator = $this->paginatorFromRequestFactory->create(
 				$request,
 				$this->countCaloricRecordsOfUser->__invoke($currentUser)
@@ -96,6 +111,10 @@ final class ListEntriesAction implements ActionHandler
 
 			if ($this->getListOfCaloricRecordsForUser instanceof PaginationAwareQuery) {
 				$this->getListOfCaloricRecordsForUser->applyPaginatorForNextQuery($paginator);
+			}
+
+			if ($this->getListOfCaloricRecordsForUser instanceof FilteringAwareQuery) {
+				$this->getListOfCaloricRecordsForUser->applyFiltersForNextQuery($queryFilters);
 			}
 
 			$records = $this->getListOfCaloricRecordsForUser->__invoke($currentUser);

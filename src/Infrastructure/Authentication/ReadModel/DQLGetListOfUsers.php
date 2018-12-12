@@ -4,30 +4,23 @@ namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
 use Caloriary\Application\Filtering\FilteringAwareQuery;
-use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\User;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
+use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
+use Caloriary\Infrastructure\Application\Pagination\DQLPagination;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
-use Nette\Utils\Paginator;
 
 final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery, FilteringAwareQuery
 {
+	use DQLFiltering;
+	use DQLPagination;
+
 	/**
 	 * @var EntityManagerInterface
 	 */
 	private $entityManager;
-
-	/**
-	 * @var Paginator|null
-	 */
-	private $paginator;
-
-	/**
-	 * @var QueryFilters|null
-	 */
-	private $filters;
 
 
 	public function __construct(EntityManagerInterface $entityManager)
@@ -37,8 +30,6 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery, F
 
 
 	/**
-	 * @todo: filtering
-	 *
 	 * @return User[]
 	 *
 	 * @throws QueryException
@@ -49,39 +40,14 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery, F
 			->from(User::class, 'user')
 			->select('user');
 
-		if ($this->paginator) {
-			$builder
-				->setMaxResults($this->paginator->getItemsPerPage())
-				->setFirstResult($this->paginator->getOffset());
-
-			// This should prevent bugs, pagination will be valid only for next Query
-			$this->paginator = null;
-		}
+		$this->applyPaginationToQueryBuilder($builder);
 
 		try {
-			if ($this->filters) {
-				$builder->andWhere($this->filters->dql());
-				$builder->setParameters($this->filters->parameters());
-
-				// This should prevent bugs, filters will be valid only for next Query
-				$this->filters = null;
-			}
+			$this->applyFiltersToQueryBuilder($builder);
 
 			return $builder->getQuery()->getResult();
 		} catch (QueryException $e) {
 			throw InvalidFilterQuery::fromQueryException($e);
 		}
-	}
-
-
-	public function applyPaginatorForNextQuery(Paginator $paginator): void
-	{
-		$this->paginator = $paginator;
-	}
-
-
-	public function applyFiltersForNextQuery(QueryFilters $filters): void
-	{
-		$this->filters = $filters;
 	}
 }
