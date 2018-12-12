@@ -114,6 +114,8 @@ final class EditCaloricRecordAction implements ActionHandler
 			);
 
 			$this->manager->flush();
+
+			return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -131,7 +133,5 @@ final class EditCaloricRecordAction implements ActionHandler
 		catch (MealNotFound $e) {
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
-
-		return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
 	}
 }

@@ -68,6 +68,10 @@ final class DeleteCaloricRecordAction implements ActionHandler
 			}
 
 			$this->caloricRecords->remove($caloricRecord);
+
+			return $response->withJson([
+				'success' => true,
+			], 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -81,9 +85,5 @@ final class DeleteCaloricRecordAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson([
-			'success' => true,
-		], 200);
 	}
 }

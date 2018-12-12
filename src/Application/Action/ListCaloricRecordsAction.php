@@ -107,6 +107,13 @@ final class ListCaloricRecordsAction implements ActionHandler
 			$totalCaloricRecordsCount = $this->countCaloricRecordsOfUser->__invoke($currentUser, $queryFilters);
 			$paginator = $this->paginatorFromRequestFactory->create($request, $totalCaloricRecordsCount);
 			$caloricRecords = $this->getListOfCaloricRecordsForUser->__invoke($currentUser, $paginator, $queryFilters);
+
+			return $response->withJson(
+				$this->paginatorResponseTransformer->toArray($paginator) + [
+					'results' => array_map([$this->caloricRecordResponseTransformer, 'toArray'], $caloricRecords)
+				],
+				200
+			);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -116,12 +123,5 @@ final class ListCaloricRecordsAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson(
-			$this->paginatorResponseTransformer->toArray($paginator) + [
-				'results' => array_map([$this->caloricRecordResponseTransformer, 'toArray'], $caloricRecords)
-			],
-			200
-		);
 	}
 }

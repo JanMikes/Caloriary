@@ -66,6 +66,8 @@ final class UserDetailAction implements ActionHandler
 			if (! $this->canUserPerformActionOnResource->__invoke($currentUser, $action, $user)) {
 				throw new RestrictedAccess();
 			}
+
+			return $response->withJson($this->userResponseTransformer->toArray($user), 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -79,7 +81,5 @@ final class UserDetailAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson($this->userResponseTransformer->toArray($user), 200);
 	}
 }

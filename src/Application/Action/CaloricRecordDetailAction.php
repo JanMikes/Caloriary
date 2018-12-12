@@ -74,6 +74,8 @@ final class CaloricRecordDetailAction implements ActionHandler
 			if (! $this->canUserPerformActionOnResource->__invoke($currentUser, $action, $caloricRecord)) {
 				throw new RestrictedAccess();
 			}
+
+			return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -87,7 +89,5 @@ final class CaloricRecordDetailAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
 	}
 }

@@ -90,6 +90,8 @@ final class EditUserAction implements ActionHandler
 			}
 
 			$this->manager->flush();
+
+			return $response->withJson($this->userResponseTransformer->toArray($user), 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -99,7 +101,5 @@ final class EditUserAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson($this->userResponseTransformer->toArray($user), 200);
 	}
 }

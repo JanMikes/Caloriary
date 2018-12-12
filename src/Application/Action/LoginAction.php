@@ -64,6 +64,13 @@ final class LoginAction implements ActionHandler
 			$user = $this->users->get($emailAddress);
 
 			$user->authenticate($password);
+
+			$token = $this->issueToken->__invoke($emailAddress, $request->getUri()->getHost());
+
+			return $response->withJson(
+				$this->userResponseTransformer->toArray($user) + ['token' => $token],
+				201
+			);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -77,13 +84,6 @@ final class LoginAction implements ActionHandler
 		catch (AuthenticationFailed $e) {
 			return $this->createAuthenticationFailedResponse($response);
 		}
-
-		$token = $this->issueToken->__invoke($emailAddress, $request->getUri()->getHost());
-
-		return $response->withJson(
-			$this->userResponseTransformer->toArray($user) + ['token' => $token],
-			201
-		);
 	}
 
 

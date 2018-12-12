@@ -64,6 +64,8 @@ final class RegisterUserAction implements ActionHandler
 			$user = User::register($emailAddress, $password, $this->isEmailRegistered);
 
 			$this->users->add($user);
+
+			return $response->withJson($this->userResponseTransformer->toArray($user), 201);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -75,7 +77,5 @@ final class RegisterUserAction implements ActionHandler
 
 			return $this->responseFormatter->formatError($response, $message);
 		}
-
-		return $response->withJson($this->userResponseTransformer->toArray($user), 201);
 	}
 }

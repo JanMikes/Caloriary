@@ -48,6 +48,8 @@ final class SelfUserDetailAction implements ActionHandler
 			$currentUser = $this->users->get(
 				EmailAddress::fromString($request->getAttribute('token')['sub'])
 			);
+
+			return $response->withJson($this->userResponseTransformer->toArray($currentUser), 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -57,7 +59,5 @@ final class SelfUserDetailAction implements ActionHandler
 		catch (UserNotFound $e) {
 			return $this->responseFormatter->formatError($response, 'User not found!', 404);
 		}
-
-		return $response->withJson($this->userResponseTransformer->toArray($currentUser), 200);
 	}
 }

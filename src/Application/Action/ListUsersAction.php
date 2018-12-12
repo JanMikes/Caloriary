@@ -108,6 +108,13 @@ final class ListUsersAction implements ActionHandler
 			$totalUsers = $this->countUsers->__invoke($queryFilters);
 			$paginator = $this->paginatorFromRequestFactory->create($request, $totalUsers);
 			$users = $this->getListOfUsers->__invoke($paginator, $queryFilters);
+
+			return $response->withJson(
+				$this->paginatorResponseTransformer->toArray($paginator) + [
+					'results' => array_map([$this->userResponseTransformer, 'toArray'], $users)
+				],
+			200
+			);
 		}
 
 		catch (InvalidFilterQuery $e) {
@@ -121,12 +128,5 @@ final class ListUsersAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson(
-			$this->paginatorResponseTransformer->toArray($paginator) + [
-				'results' => array_map([$this->userResponseTransformer, 'toArray'], $users)
-			],
-		200
-		);
 	}
 }

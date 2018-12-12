@@ -60,6 +60,10 @@ final class DeleteUserAction implements ActionHandler
 			}
 
 			$this->users->remove($user);
+
+			return $response->withJson([
+				'success' => true,
+			], 200);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -73,9 +77,5 @@ final class DeleteUserAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson([
-			'success' => true,
-		], 200);
 	}
 }

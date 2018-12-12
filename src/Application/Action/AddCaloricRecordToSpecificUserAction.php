@@ -109,6 +109,10 @@ final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 				$meal,
 				$this->canUserPerformAction
 			);
+
+			$this->caloricRecords->add($caloricRecord);
+
+			return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 201);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -126,10 +130,6 @@ final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 		catch (MealNotFound $e) {
 			return $this->responseFormatter->formatError($response, $e->getMessage());
 		}
-
-		$this->caloricRecords->add($caloricRecord);
-
-		return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 201);
 	}
 
 

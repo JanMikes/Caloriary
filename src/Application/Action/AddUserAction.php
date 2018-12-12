@@ -86,6 +86,8 @@ final class AddUserAction implements ActionHandler
 			);
 
 			$this->users->add($user);
+
+			return $response->withJson($this->userResponseTransformer->toArray($user), 201);
 		}
 
 		catch (\InvalidArgumentException $e) {
@@ -101,7 +103,5 @@ final class AddUserAction implements ActionHandler
 		catch (RestrictedAccess $e) {
 			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
 		}
-
-		return $response->withJson($this->userResponseTransformer->toArray($user), 201);
 	}
 }
