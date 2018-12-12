@@ -16,6 +16,7 @@ use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
+use Doctrine\ORM\Query\QueryException;
 
 final class ListUsersAction implements ActionHandler
 {
@@ -81,6 +82,8 @@ final class ListUsersAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
+			$filterQuery = (string) $request->getQueryParam('filter', '');
+
 			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers->__invoke());
 
 			if ($this->getListOfUsers instanceof PaginationAwareQuery) {
@@ -88,6 +91,10 @@ final class ListUsersAction implements ActionHandler
 			}
 
 			$users = $this->getListOfUsers->__invoke();
+		}
+
+		catch (QueryException $e) {
+			return $this->responseFormatter->formatError($response, 'Invalid filter query provided.', 400);
 		}
 
 		catch (\InvalidArgumentException $e) {
