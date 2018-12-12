@@ -2,16 +2,16 @@
 
 namespace Caloriary\Infrastructure\Calories\ReadModel;
 
-use Caloriary\Application\Filtering\FilteringAwareQuery;
-use Caloriary\Application\Pagination\PaginationAwareQuery;
+use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\User;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\ReadModel\GetListOfCaloricRecordsForUser;
 use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
 use Caloriary\Infrastructure\Application\Pagination\DQLPagination;
 use Doctrine\ORM\EntityManagerInterface;
+use Nette\Utils\Paginator;
 
-final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecordsForUser, PaginationAwareQuery, FilteringAwareQuery
+final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecordsForUser
 {
 	use DQLPagination;
 	use DQLFiltering;
@@ -31,7 +31,7 @@ final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecords
 	/**
 	 * @return CaloricRecord[]
 	 */
-	public function __invoke(User $user): array
+	public function __invoke(User $user, Paginator $paginator, QueryFilters $filters): array
 	{
 		$builder = $this->entityManager->createQueryBuilder()
 			->from(CaloricRecord::class, 'record')
@@ -40,8 +40,8 @@ final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecords
 			->setParameter('user', $user)
 			->orderBy('record.ateAt', 'DESC');
 
-		$this->applyFiltersToQueryBuilder($builder);
-		$this->applyPaginationToQueryBuilder($builder);
+		$this->applyFiltersToQueryBuilder($builder, $filters);
+		$this->applyPaginationToQueryBuilder($builder, $paginator);
 
 		return $builder->getQuery()->getResult();
 	}

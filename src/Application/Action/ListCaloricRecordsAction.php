@@ -5,8 +5,6 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Caloriary\Application\Filtering\FilteringAwareQuery;
-use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Caloriary\Authentication\Repository\Users;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
@@ -106,25 +104,9 @@ final class ListCaloricRecordsAction implements ActionHandler
 			}
 
 			$queryFilters = $this->queryFiltersFromRequestFactory->create($request);
-
-			if ($this->countCaloricRecordsOfUser instanceof FilteringAwareQuery) {
-				$this->countCaloricRecordsOfUser->applyFiltersForNextQuery($queryFilters);
-			}
-
-			$paginator = $this->paginatorFromRequestFactory->create(
-				$request,
-				$this->countCaloricRecordsOfUser->__invoke($currentUser)
-			);
-
-			if ($this->getListOfCaloricRecordsForUser instanceof PaginationAwareQuery) {
-				$this->getListOfCaloricRecordsForUser->applyPaginatorForNextQuery($paginator);
-			}
-
-			if ($this->getListOfCaloricRecordsForUser instanceof FilteringAwareQuery) {
-				$this->getListOfCaloricRecordsForUser->applyFiltersForNextQuery($queryFilters);
-			}
-
-			$caloricRecords = $this->getListOfCaloricRecordsForUser->__invoke($currentUser);
+			$totalCaloricRecordsCount = $this->countCaloricRecordsOfUser->__invoke($currentUser, $queryFilters);
+			$paginator = $this->paginatorFromRequestFactory->create($request, $totalCaloricRecordsCount);
+			$caloricRecords = $this->getListOfCaloricRecordsForUser->__invoke($currentUser, $paginator, $queryFilters);
 		}
 
 		catch (\InvalidArgumentException $e) {

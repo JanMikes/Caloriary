@@ -2,14 +2,14 @@
 
 namespace Caloriary\Infrastructure\Calories\ReadModel;
 
-use Caloriary\Application\Filtering\FilteringAwareQuery;
+use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\User;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\ReadModel\CountCaloricRecordsOfUser;
 use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class DQLCountCaloricRecordsOfUser implements CountCaloricRecordsOfUser, FilteringAwareQuery
+final class DQLCountCaloricRecordsOfUser implements CountCaloricRecordsOfUser
 {
 	use DQLFiltering;
 
@@ -25,7 +25,7 @@ final class DQLCountCaloricRecordsOfUser implements CountCaloricRecordsOfUser, F
 	}
 
 
-	public function __invoke(User $user): int
+	public function __invoke(User $user, QueryFilters $filters): int
 	{
 		$builder = $this->entityManager->createQueryBuilder()
 			->from(CaloricRecord::class, 'record')
@@ -33,7 +33,7 @@ final class DQLCountCaloricRecordsOfUser implements CountCaloricRecordsOfUser, F
 			->where('record.owner = :user')
 			->setParameter('user', $user);
 
-		$this->applyFiltersToQueryBuilder($builder);
+		$this->applyFiltersToQueryBuilder($builder, $filters);
 
 		return (int) $builder->getQuery()
 			->setMaxResults(1)

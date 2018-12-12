@@ -7,29 +7,14 @@ use Doctrine\ORM\QueryBuilder;
 
 trait DQLFiltering
 {
-	/**
-	 * @var QueryFilters|null
-	 */
-	private $filters;
-
-
-	public function applyFiltersForNextQuery(QueryFilters $filters): void
+	private function applyFiltersToQueryBuilder(QueryBuilder $builder, QueryFilters $filters): void
 	{
-		$this->filters = $filters;
-	}
+		if ($filters->hasFilters()) {
+			$builder->andWhere($filters->dql());
 
-
-	private function applyFiltersToQueryBuilder(QueryBuilder $builder): void
-	{
-		if ($this->filters && $this->filters->hasFilters()) {
-			$builder->andWhere($this->filters->dql());
-
-			foreach ($this->filters->parameters() as $key => $value) {
+			foreach ($filters->parameters() as $key => $value) {
 				$builder->setParameter($key, $value);
 			}
-
-			// This should prevent bugs, filters will be valid only for next Query
-			$this->filters = null;
 		}
 	}
 }

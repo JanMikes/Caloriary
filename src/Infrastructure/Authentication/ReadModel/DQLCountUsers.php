@@ -3,14 +3,14 @@
 namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
-use Caloriary\Application\Filtering\FilteringAwareQuery;
+use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\User;
 use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 
-final class DQLCountUsers implements CountUsers, FilteringAwareQuery
+final class DQLCountUsers implements CountUsers
 {
 	use DQLFiltering;
 
@@ -26,14 +26,14 @@ final class DQLCountUsers implements CountUsers, FilteringAwareQuery
 	}
 
 
-	public function __invoke(): int
+	public function __invoke(QueryFilters $filters): int
 	{
 		$builder = $this->entityManager->createQueryBuilder()
 			->from(User::class, 'user')
 			->select('COUNT(user.emailAddress)');
 
 		try {
-			$this->applyFiltersToQueryBuilder($builder);
+			$this->applyFiltersToQueryBuilder($builder, $filters);
 
 			return (int) $builder
 				->getQuery()

@@ -6,11 +6,9 @@ use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
-use Caloriary\Application\Filtering\FilteringAwareQuery;
 use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\Repository\Users;
-use Caloriary\Authentication\User;
 use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
@@ -19,7 +17,6 @@ use Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactor
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
-use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class ListUsersAction implements ActionHandler
@@ -108,22 +105,9 @@ final class ListUsersAction implements ActionHandler
 			}
 
 			$queryFilters = $this->queryFiltersFromRequestFactory->create($request);
-
-			if ($this->countUsers instanceof FilteringAwareQuery) {
-				$this->countUsers->applyFiltersForNextQuery($queryFilters);
-			}
-
-			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers->__invoke());
-
-			if ($this->getListOfUsers instanceof PaginationAwareQuery) {
-				$this->getListOfUsers->applyPaginatorForNextQuery($paginator);
-			}
-
-			if ($this->getListOfUsers instanceof FilteringAwareQuery) {
-				$this->getListOfUsers->applyFiltersForNextQuery($queryFilters);
-			}
-
-			$users = $this->getListOfUsers->__invoke();
+			$totalUsers = $this->countUsers->__invoke($queryFilters);
+			$paginator = $this->paginatorFromRequestFactory->create($request, $totalUsers);
+			$users = $this->getListOfUsers->__invoke($paginator, $queryFilters);
 		}
 
 		catch (InvalidFilterQuery $e) {

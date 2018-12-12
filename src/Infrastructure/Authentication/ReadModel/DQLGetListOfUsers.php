@@ -3,16 +3,16 @@
 namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
-use Caloriary\Application\Filtering\FilteringAwareQuery;
+use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\User;
-use Caloriary\Application\Pagination\PaginationAwareQuery;
 use Caloriary\Infrastructure\Application\Filtering\DQLFiltering;
 use Caloriary\Infrastructure\Application\Pagination\DQLPagination;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
+use Nette\Utils\Paginator;
 
-final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery, FilteringAwareQuery
+final class DQLGetListOfUsers implements GetListOfUsers
 {
 	use DQLFiltering;
 	use DQLPagination;
@@ -34,16 +34,16 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery, F
 	 *
 	 * @throws QueryException
 	 */
-	public function __invoke(): array
+	public function __invoke(Paginator $paginator, QueryFilters $filters): array
 	{
 		$builder = $this->entityManager->createQueryBuilder()
 			->from(User::class, 'user')
 			->select('user');
 
-		$this->applyPaginationToQueryBuilder($builder);
+		$this->applyPaginationToQueryBuilder($builder, $paginator);
 
 		try {
-			$this->applyFiltersToQueryBuilder($builder);
+			$this->applyFiltersToQueryBuilder($builder, $filters);
 
 			return $builder->getQuery()->getResult();
 		} catch (QueryException $e) {

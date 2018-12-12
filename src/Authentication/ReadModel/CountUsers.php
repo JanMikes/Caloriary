@@ -2,7 +2,9 @@
 
 namespace Caloriary\Authentication\ReadModel;
 
+use Caloriary\Application\Filtering\QueryFilters;
+
 interface CountUsers
 {
-	public function __invoke(): int;
+	public function __invoke(QueryFilters $filters): int;
 }
