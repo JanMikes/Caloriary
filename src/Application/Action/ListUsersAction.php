@@ -6,6 +6,7 @@ use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
+use Caloriary\Application\Filtering\FilteringAwareQuery;
 use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\Repository\Users;
@@ -14,6 +15,7 @@ use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
+use Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory;
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
@@ -50,6 +52,11 @@ final class ListUsersAction implements ActionHandler
 	 */
 	private $countUsers;
 
+	/**
+	 * @var QueryFiltersFromRequestFactory
+	 */
+	private $queryFiltersFromRequestFactory;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -57,7 +64,8 @@ final class ListUsersAction implements ActionHandler
 		GetListOfUsers $getListOfUsers,
 		CanUserPerformAction $canUserPerformAction,
 		PaginatorFromRequestFactory $paginatorFromRequestFactory,
-		CountUsers $countUsers
+		CountUsers $countUsers,
+		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -66,6 +74,7 @@ final class ListUsersAction implements ActionHandler
 		$this->getListOfUsers = $getListOfUsers;
 		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
 		$this->countUsers = $countUsers;
+		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
 	}
 
 
@@ -82,12 +91,20 @@ final class ListUsersAction implements ActionHandler
 				throw new RestrictedAccess();
 			}
 
-			$filterQuery = (string) $request->getQueryParam('filter', '');
+			$queryFilters = $this->queryFiltersFromRequestFactory->create($request);
+
+			if ($this->countUsers instanceof FilteringAwareQuery) {
+				$this->countUsers->applyFiltersForNextQuery($queryFilters);
+			}
 
 			$paginator = $this->paginatorFromRequestFactory->create($request, $this->countUsers->__invoke());
 
 			if ($this->getListOfUsers instanceof PaginationAwareQuery) {
 				$this->getListOfUsers->applyPaginatorForNextQuery($paginator);
+			}
+
+			if ($this->getListOfUsers instanceof FilteringAwareQuery) {
+				$this->getListOfUsers->applyFiltersForNextQuery($queryFilters);
 			}
 
 			$users = $this->getListOfUsers->__invoke();

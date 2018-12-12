@@ -3,6 +3,8 @@
 namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
+use Caloriary\Application\Filtering\FilteringAwareQuery;
+use Caloriary\Application\Filtering\QueryFilters;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\User;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
@@ -10,7 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Nette\Utils\Paginator;
 
-final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
+final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery, FilteringAwareQuery
 {
 	/**
 	 * @var EntityManagerInterface
@@ -21,6 +23,11 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
 	 * @var Paginator|null
 	 */
 	private $paginator;
+
+	/**
+	 * @var QueryFilters|null
+	 */
+	private $filters;
 
 
 	public function __construct(EntityManagerInterface $entityManager)
@@ -47,39 +54,18 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
 				->setMaxResults($this->paginator->getItemsPerPage())
 				->setFirstResult($this->paginator->getOffset());
 
-			// This should prevent bugs, pagination will be valid only for single Query
+			// This should prevent bugs, pagination will be valid only for next Query
 			$this->paginator = null;
 		}
 
-		$query = "(email eq 'j.mikes@me.com') AND (date eq '2016-05-01') AND ((number_of_calories gt 20) OR (number_of_calories lt 10))";
-
-		$pattern = '/(?<field>\w*) (?<operator>eq|ne|gt|lt|lte|gte*) (?<value>\'\S*\'|\d*)/';
-		$iteration = 1;
-		$parameters = [];
-		$query = preg_replace_callback($pattern, function($match) use (&$iteration, &$parameters) {
-			$field = $match['field'];
-			$operator = $match['operator'];
-			$value = $match['value'];
-
-			$parameters['queryParam' . $iteration] = is_numeric($value) ? (float) $value : trim($value, '\'');
-			$value = ':queryParam' . $iteration;
-
-			$field = str_replace('email', 'user.emailAddress', $field);
-
-			$operator = str_replace(
-				['eq', 'ne', 'lt', 'lte', 'gt', 'gte'],
-				['=', '!=', '<', '<=', '>', '>='],
-				$operator
-			);
-
-			$iteration++;
-
-			return "$field $operator $value";
-		}, $query);
-
 		try {
-			$builder->andWhere($query);
-			$builder->setParameters($parameters);
+			if ($this->filters) {
+				$builder->andWhere($this->filters->dql());
+				$builder->setParameters($this->filters->parameters());
+
+				// This should prevent bugs, filters will be valid only for next Query
+				$this->filters = null;
+			}
 
 			return $builder->getQuery()->getResult();
 		} catch (QueryException $e) {
@@ -91,5 +77,11 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
 	public function applyPaginatorForNextQuery(Paginator $paginator): void
 	{
 		$this->paginator = $paginator;
+	}
+
+
+	public function applyFiltersForNextQuery(QueryFilters $filters): void
+	{
+		$this->filters = $filters;
 	}
 }

@@ -19,6 +19,7 @@ final class QueryFiltersFromRequestFactory
 		'gte' => '>=',
 	];
 
+	// @todo: this could be probably moved to different place
 	public const FIELDS = [
 		'email' => 'user.emailAddress',
 	];
@@ -45,6 +46,10 @@ final class QueryFiltersFromRequestFactory
 
 			return "$field $operator $value";
 		}, $query);
+
+		if (!is_string($query)) {
+			throw new InvalidFilterQuery('Filters could not be parsed');
+		}
 
 		return new QueryFilters($query, $parameters);
 	}
@@ -78,6 +83,6 @@ final class QueryFiltersFromRequestFactory
 			));
 		}
 
-		return self::OPERATIONS[$field];
+		return self::FIELDS[$field];
 	}
 }
