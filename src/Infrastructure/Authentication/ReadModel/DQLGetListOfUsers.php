@@ -2,6 +2,7 @@
 
 namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
+use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\User;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
@@ -76,10 +77,14 @@ final class DQLGetListOfUsers implements GetListOfUsers, PaginationAwareQuery
 			return "$field $operator $value";
 		}, $query);
 
-		$builder->andWhere($query);
-		$builder->setParameters($parameters);
+		try {
+			$builder->andWhere($query);
+			$builder->setParameters($parameters);
 
-		return $builder->getQuery()->getResult();
+			return $builder->getQuery()->getResult();
+		} catch (QueryException $e) {
+			throw InvalidFilterQuery::fromQueryException($e);
+		}
 	}
 
 

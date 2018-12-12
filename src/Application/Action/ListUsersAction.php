@@ -5,6 +5,7 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
+use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
 use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
 use Caloriary\Authentication\Repository\Users;
@@ -16,7 +17,6 @@ use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Caloriary\Application\Pagination\PaginationAwareQuery;
-use Doctrine\ORM\Query\QueryException;
 
 final class ListUsersAction implements ActionHandler
 {
@@ -93,8 +93,8 @@ final class ListUsersAction implements ActionHandler
 			$users = $this->getListOfUsers->__invoke();
 		}
 
-		catch (QueryException $e) {
-			return $this->responseFormatter->formatError($response, 'Invalid filter query provided.', 400);
+		catch (InvalidFilterQuery $e) {
+			return $this->responseFormatter->formatError($response, $e->getMessage(), 400);
 		}
 
 		catch (\InvalidArgumentException $e) {

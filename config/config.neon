@@ -92,6 +92,7 @@ services:
 	- Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory(%pagination.maxItemsPerPage%, %pagination.defaultItemsPerPage%)
 	- Caloriary\Infrastructure\Authentication\ReadModel\DQLCountUsers
 	- Caloriary\Infrastructure\Calories\ReadModel\DQLCountCaloricRecordsOfUser
+	- Caloriary\Infrastructure\Application\Filtering\QueryFiltersFromRequestFactory
 
 parameters:
 	pagination:
