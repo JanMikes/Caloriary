@@ -135,7 +135,8 @@ final class EditEntryAction implements ActionHandler
 		// @TODO: transformer for response
 		return $response->withJson([
 			'id' => $caloricRecord->id()->toString(),
-			'date' => $caloricRecord->ateAt()->format(DATE_ATOM),
+			'date' => $caloricRecord->ateAt()->format('Y-m-d'),
+			'time' => $caloricRecord->ateAt()->format('H:i'),
 			'text' => $caloricRecord->text()->toString(),
 			'calories' => $caloricRecord->calories()->toInteger(),
 			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($caloricRecord),

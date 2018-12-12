@@ -18,6 +18,12 @@ slimApi:
 env:
 	directory: %appDir%/../../
 
+orm:
+	configuration:
+		customDatetimeFunctions:
+			DATE: DoctrineExtensions\Query\Mysql\Date
+			TIME: DoctrineExtensions\Query\Mysql\Time
+
 dbal:
 	connection:
 		host: @env::get('DATABASE_HOST')

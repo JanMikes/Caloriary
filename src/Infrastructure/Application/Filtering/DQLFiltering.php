@@ -23,7 +23,10 @@ trait DQLFiltering
 	{
 		if ($this->filters && $this->filters->hasFilters()) {
 			$builder->andWhere($this->filters->dql());
-			$builder->setParameters($this->filters->parameters());
+
+			foreach ($this->filters->parameters() as $key => $value) {
+				$builder->setParameter($key, $value);
+			}
 
 			// This should prevent bugs, filters will be valid only for next Query
 			$this->filters = null;

@@ -137,7 +137,8 @@ final class ListEntriesAction implements ActionHandler
 			'results' => array_map(function(CaloricRecord $record) {
 				return [
 					'id' => $record->id()->toString(),
-					'date' => $record->ateAt()->format(DATE_ATOM),
+					'date' => $record->ateAt()->format('Y-m-d'),
+					'time' => $record->ateAt()->format('H:i'),
 					'text' => $record->text()->toString(),
 					'calories' => $record->calories()->toInteger(),
 					'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),

@@ -19,9 +19,14 @@ final class QueryFiltersFromRequestFactory
 		'gte' => '>=',
 	];
 
-	// @todo: this could be probably moved to different place
 	public const FIELDS = [
 		'email' => 'user.emailAddress',
+		'dailyLimit' => 'user.dailyLimit',
+		'id' => 'record.id',
+		'date' => 'DATE(record.ateAt)',
+		'time' => 'TIME(record.ateAt)',
+		'text' => 'record.text',
+		'calories' => 'record.calories',
 	];
 
 

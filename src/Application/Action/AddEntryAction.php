@@ -119,7 +119,8 @@ final class AddEntryAction implements ActionHandler
 		// @TODO: transformer for response
 		return $response->withJson([
 			'id' => $record->id()->toString(),
-			'date' => $record->ateAt()->format(DATE_ATOM),
+			'date' => $record->ateAt()->format('Y-m-d'),
+			'time' => $record->ateAt()->format('H:i'),
 			'calories' => $record->calories()->toInteger(),
 			'text' => $record->text()->toString(),
 			'withinLimit' => $this->hasCaloriesWithinDailyLimit->__invoke($record),
