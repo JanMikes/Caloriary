@@ -8,6 +8,9 @@ use Doctrine\DBAL\Types\IntegerType;
 
 final class DailyCaloriesLimitType extends IntegerType
 {
+	/**
+	 * @inheritdoc
+	 */
 	public function convertToPHPValue($value, AbstractPlatform $platform)
 	{
 		\assert(is_numeric($value));
@@ -18,6 +21,9 @@ final class DailyCaloriesLimitType extends IntegerType
 	}
 
 
+	/**
+	 * @inheritdoc
+	 */
 	public function convertToDatabaseValue($value, AbstractPlatform $platform)
 	{
 		\assert($value instanceof DailyCaloriesLimit);

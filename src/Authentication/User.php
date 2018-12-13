@@ -95,7 +95,7 @@ class User implements Resource
 	/**
 	 * @throws AuthenticationFailed
 	 */
-	public function authenticate(ClearTextPassword $password) : void
+	public function authenticate(ClearTextPassword $password): void
 	{
 		if ($password->matches($this->passwordHash) === false) {
 			throw new AuthenticationFailed();

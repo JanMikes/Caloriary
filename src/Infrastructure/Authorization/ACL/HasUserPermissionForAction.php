@@ -15,6 +15,9 @@ final class HasUserPermissionForAction implements CanUserPerformAction
 	private $permission;
 
 
+	/**
+	 * @param string[][] $permittedActionsForUsers
+	 */
 	public function __construct(array $permittedActionsForUsers)
 	{
 		$this->permission = new Permission();

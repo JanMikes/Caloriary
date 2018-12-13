@@ -4,6 +4,9 @@ namespace Caloriary\Calories\Value;
 
 class MealDescription
 {
+	/**
+	 * @var string
+	 */
 	private $text;
 
 

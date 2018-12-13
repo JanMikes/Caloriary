@@ -51,6 +51,9 @@ final class DeleteCaloricRecordAction implements ActionHandler
 	}
 
 
+	/**
+	 * @param string[] $arguments
+	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		try {

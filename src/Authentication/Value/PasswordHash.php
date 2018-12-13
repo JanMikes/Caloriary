@@ -13,7 +13,7 @@ class PasswordHash
 	/**
 	 * @throws \InvalidArgumentException
 	 */
-	public static function fromString(string $string) : self
+	public static function fromString(string $string): self
 	{
 		if (0 !== strpos($string, '$')) {
 			throw new \InvalidArgumentException(sprintf(

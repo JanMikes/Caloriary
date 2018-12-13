@@ -19,6 +19,9 @@ final class CaloricRecordResponseTransformer
 	}
 
 
+	/**
+	 * @return mixed[]
+	 */
 	public function toArray(CaloricRecord $caloricRecord): array
 	{
 		return [

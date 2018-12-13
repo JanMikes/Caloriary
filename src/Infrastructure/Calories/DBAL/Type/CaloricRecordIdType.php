@@ -8,6 +8,9 @@ use Doctrine\DBAL\Types\StringType;
 
 final class CaloricRecordIdType extends StringType
 {
+	/**
+	 * @inheritdoc
+	 */
 	public function convertToPHPValue($value, AbstractPlatform $platform)
 	{
 		\assert(is_string($value));
@@ -16,6 +19,9 @@ final class CaloricRecordIdType extends StringType
 	}
 
 
+	/**
+	 * @inheritdoc
+	 */
 	public function convertToDatabaseValue($value, AbstractPlatform $platform)
 	{
 		\assert($value instanceof CaloricRecordId);

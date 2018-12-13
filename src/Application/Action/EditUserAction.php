@@ -67,6 +67,9 @@ final class EditUserAction implements ActionHandler
 	}
 
 
+	/**
+	 * @param string[] $arguments
+	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		try {

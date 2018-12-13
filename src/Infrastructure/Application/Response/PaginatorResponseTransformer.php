@@ -6,6 +6,9 @@ use Nette\Utils\Paginator;
 
 final class PaginatorResponseTransformer
 {
+	/**
+	 * @return mixed[]
+	 */
 	public function toArray(Paginator $paginator): array
 	{
 		return [

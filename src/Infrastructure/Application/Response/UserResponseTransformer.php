@@ -6,6 +6,9 @@ use Caloriary\Authentication\User;
 
 final class UserResponseTransformer
 {
+	/**
+	 * @return mixed[]
+	 */
 	public function toArray(User $user): array
 	{
 		return [

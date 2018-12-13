@@ -51,12 +51,12 @@ final class LoginAction implements ActionHandler
 	}
 
 
+	/**
+	 * @param string[] $arguments
+	 */
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		$body = $request->getDecodedJsonFromBody();
-
-		// @TODO: Validate body, via middleware?
-		// @TODO: Transform into DTO, so we have strict types
 
 		try {
 			$emailAddress = EmailAddress::fromString($body->email ?? '');
