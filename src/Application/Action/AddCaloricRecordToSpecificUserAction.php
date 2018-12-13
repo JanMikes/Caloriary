@@ -20,6 +20,7 @@ use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 {
@@ -53,6 +54,11 @@ final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 	 */
 	private $caloricRecordResponseTransformer;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		CaloricRecords $caloricRecords,
@@ -60,7 +66,8 @@ final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 		CanUserPerformAction $canUserPerformAction,
 		ResponseFormatter $responseFormatter,
 		GetCaloriesForMeal $getCaloriesForMeal,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+		UserProvider $userProvider
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
@@ -69,6 +76,7 @@ final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 		$this->responseFormatter = $responseFormatter;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
 		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+		$this->userProvider = $userProvider;
 	}
 
 
@@ -77,10 +85,7 @@ final class AddCaloricRecordToSpecificUserAction implements ActionHandler
 		$body = $request->getDecodedJsonFromBody();
 
 		try {
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$user = $this->users->get(
 				EmailAddress::fromString($arguments['email'] ?? '')
 			);

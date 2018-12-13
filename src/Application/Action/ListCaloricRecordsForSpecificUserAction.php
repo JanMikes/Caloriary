@@ -18,6 +18,7 @@ use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 {
@@ -66,6 +67,11 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 	 */
 	private $caloricRecordResponseTransformer;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -76,7 +82,8 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 		CountCaloricRecordsOfUser $countCaloricRecordsOfUser,
 		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory,
 		PaginatorResponseTransformer $paginatorResponseTransformer,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -88,16 +95,14 @@ final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
 		$this->paginatorResponseTransformer = $paginatorResponseTransformer;
 		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+		$this->userProvider = $userProvider;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		try {
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$user = $this->users->get(
 				EmailAddress::fromString($arguments['email'] ?? '')
 			);

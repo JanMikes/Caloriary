@@ -16,6 +16,7 @@ use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\Value\DailyCaloriesLimit;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class AddUserAction implements ActionHandler
 {
@@ -44,13 +45,19 @@ final class AddUserAction implements ActionHandler
 	 */
 	private $userResponseTransformer;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		IsEmailRegistered $isEmailRegistered,
 		Users $users,
 		CanUserPerformAction $canUserPerformAction,
-		UserResponseTransformer $userResponseTransformer
+		UserResponseTransformer $userResponseTransformer,
+		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -58,20 +65,15 @@ final class AddUserAction implements ActionHandler
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->userResponseTransformer = $userResponseTransformer;
+		$this->userProvider = $userProvider;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
-		// @TODO: Validate body, via middleware?
-		// @TODO: Transform into DTO, so we have strict types
-
 		try {
 			$body = $request->getDecodedJsonFromBody();
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$emailAddress = EmailAddress::fromString($body->email ?? '');
 			$password = ClearTextPassword::fromString($body->password ?? '');
 			$dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);

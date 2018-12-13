@@ -102,6 +102,8 @@ services:
 	- Caloriary\Infrastructure\Application\Response\UserResponseTransformer
 	- Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer
 	- Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer
+	- Caloriary\Infrastructure\Authentication\UserProvider
+	- Caloriary\Infrastructure\Application\Middleware\PopulateUserProviderMiddleware
 
 parameters:
 	pagination:
@@ -150,8 +152,9 @@ parameters:
 			- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
 
 		beforeRequestMiddlewares:
-			- Tuupola\Middleware\CorsMiddleware
+			- Caloriary\Infrastructure\Application\Middleware\PopulateUserProviderMiddleware
 			- Tuupola\Middleware\JwtAuthentication
+			- Tuupola\Middleware\CorsMiddleware
 
 		routes:
 			api:

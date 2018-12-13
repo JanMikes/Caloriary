@@ -18,6 +18,7 @@ use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 use Doctrine\Common\Persistence\ObjectManager;
 
 final class EditCaloricRecordAction implements ActionHandler
@@ -57,6 +58,11 @@ final class EditCaloricRecordAction implements ActionHandler
 	 */
 	private $caloricRecordResponseTransformer;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -65,7 +71,8 @@ final class EditCaloricRecordAction implements ActionHandler
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
 		ObjectManager $manager,
 		GetCaloriesForMeal $getCaloriesForMeal,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -75,20 +82,15 @@ final class EditCaloricRecordAction implements ActionHandler
 		$this->manager = $manager;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
 		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+		$this->userProvider = $userProvider;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
-		// @TODO: Validate body, via middleware?
-		// @TODO: Transform into DTO, so we have strict types
-
 		try {
 			$body = $request->getDecodedJsonFromBody();
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
 			$caloricRecord = $this->caloricRecords->get($recordId);
 			$ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);

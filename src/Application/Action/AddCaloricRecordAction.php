@@ -17,6 +17,7 @@ use Caloriary\Calories\Value\Calories;
 use Caloriary\Calories\Value\MealDescription;
 use Caloriary\Infrastructure\Application\Response\CaloricRecordResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class AddCaloricRecordAction implements ActionHandler
 {
@@ -50,6 +51,11 @@ final class AddCaloricRecordAction implements ActionHandler
 	 */
 	private $caloricRecordResponseTransformer;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		CaloricRecords $caloricRecords,
@@ -57,7 +63,8 @@ final class AddCaloricRecordAction implements ActionHandler
 		CanUserPerformAction $canUserPerformAction,
 		ResponseFormatter $responseFormatter,
 		GetCaloriesForMeal $getCaloriesForMeal,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer
+		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+		UserProvider $userProvider
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
@@ -66,6 +73,7 @@ final class AddCaloricRecordAction implements ActionHandler
 		$this->responseFormatter = $responseFormatter;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;
 		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+		$this->userProvider = $userProvider;
 	}
 
 
@@ -74,10 +82,7 @@ final class AddCaloricRecordAction implements ActionHandler
 		$body = $request->getDecodedJsonFromBody();
 
 		try {
-			// @TODO: get user from attributes (set it via middleware)
-			$user = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
 
 			if (! $ateAt instanceof \DateTimeImmutable) {
@@ -94,7 +99,7 @@ final class AddCaloricRecordAction implements ActionHandler
 
 			$caloricRecord = CaloricRecord::create(
 				$this->caloricRecords->nextIdentity(),
-				$user,
+				$currentUser,
 				$calories,
 				$ateAt,
 				$meal,

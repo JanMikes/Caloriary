@@ -18,6 +18,7 @@ use Caloriary\Infrastructure\Application\Pagination\PaginatorFromRequestFactory;
 use Caloriary\Infrastructure\Application\Response\PaginatorResponseTransformer;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
 use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class ListUsersAction implements ActionHandler
 {
@@ -66,6 +67,11 @@ final class ListUsersAction implements ActionHandler
 	 */
 	private $paginatorResponseTransformer;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
@@ -76,7 +82,8 @@ final class ListUsersAction implements ActionHandler
 		CountUsers $countUsers,
 		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory,
 		UserResponseTransformer $userResponseTransformer,
-		PaginatorResponseTransformer $paginatorResponseTransformer
+		PaginatorResponseTransformer $paginatorResponseTransformer,
+		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
@@ -88,16 +95,14 @@ final class ListUsersAction implements ActionHandler
 		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
 		$this->userResponseTransformer = $userResponseTransformer;
 		$this->paginatorResponseTransformer = $paginatorResponseTransformer;
+		$this->userProvider = $userProvider;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		try {
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$action = UserAction::get(UserAction::LIST_USERS);
 
 			if (! $this->canUserPerformAction->__invoke($currentUser, $action)) {

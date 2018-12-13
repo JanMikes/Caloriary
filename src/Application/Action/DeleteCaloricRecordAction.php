@@ -14,6 +14,7 @@ use Caloriary\Calories\Exception\CaloricRecordNotFound;
 use Caloriary\Calories\Repository\CaloricRecords;
 use Caloriary\Calories\Value\CaloricRecordId;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class DeleteCaloricRecordAction implements ActionHandler
 {
@@ -37,28 +38,32 @@ final class DeleteCaloricRecordAction implements ActionHandler
 	 */
 	private $caloricRecords;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
 		CaloricRecords $caloricRecords,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource
+		CanUserPerformActionOnResource $canUserPerformActionOnResource,
+		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->caloricRecords = $caloricRecords;
+		$this->userProvider = $userProvider;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		try {
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
 			$caloricRecord = $this->caloricRecords->get($recordId);
 			$action = UserAction::get(UserAction::DELETE_CALORIC_RECORD);

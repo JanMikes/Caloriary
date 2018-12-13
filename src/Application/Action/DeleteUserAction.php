@@ -12,6 +12,7 @@ use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Infrastructure\Application\Response\ResponseFormatter;
+use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class DeleteUserAction implements ActionHandler
 {
@@ -30,26 +31,30 @@ final class DeleteUserAction implements ActionHandler
 	 */
 	private $canUserPerformAction;
 
+	/**
+	 * @var UserProvider
+	 */
+	private $userProvider;
+
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
 		Users $users,
-		CanUserPerformAction $canUserPerformAction
+		CanUserPerformAction $canUserPerformAction,
+		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
 		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
+		$this->userProvider = $userProvider;
 	}
 
 
 	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
 	{
 		try {
-			// @TODO: get user from attributes (set it via middleware)
-			$currentUser = $this->users->get(
-				EmailAddress::fromString($request->getAttribute('token')['sub'])
-			);
+			$currentUser = $this->userProvider->currentUser();
 			$user = $this->users->get(
 				EmailAddress::fromString($arguments['email'] ?? '')
 			);
