@@ -11,7 +11,7 @@ use Doctrine\DBAL\Types\IntegerType;
 final class DailyCaloriesLimitType extends IntegerType
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
@@ -24,7 +24,7 @@ final class DailyCaloriesLimitType extends IntegerType
 
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {

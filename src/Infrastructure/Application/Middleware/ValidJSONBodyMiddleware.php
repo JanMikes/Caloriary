@@ -26,7 +26,9 @@ final class ValidJSONBodyMiddleware implements Middleware
 
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
-        if ((string) $request->getBody()) {
+        $body = (string) $request->getBody();
+
+        if ($body !== '') {
             try {
                 $request->getDecodedJsonFromBody();
             } catch (JsonException $e) {

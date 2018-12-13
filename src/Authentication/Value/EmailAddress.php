@@ -17,7 +17,7 @@ class EmailAddress
      */
     public static function fromString(string $mail): self
     {
-        if (!\filter_var($mail, \FILTER_VALIDATE_EMAIL)) {
+        if (\filter_var($mail, \FILTER_VALIDATE_EMAIL) === false) {
             throw new \InvalidArgumentException(sprintf(
                 'Invalid email "%s" provided',
                 $mail

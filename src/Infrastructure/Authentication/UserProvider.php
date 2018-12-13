@@ -36,7 +36,7 @@ final class UserProvider
 
     public function currentUser(): User
     {
-        if (!$this->currentUser) {
+        if ($this->currentUser === null) {
             throw new RestrictedAccess('User is not logged in');
         }
 

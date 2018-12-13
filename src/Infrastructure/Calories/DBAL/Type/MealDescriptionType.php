@@ -11,7 +11,7 @@ use Doctrine\DBAL\Types\TextType;
 final class MealDescriptionType extends TextType
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
@@ -22,7 +22,7 @@ final class MealDescriptionType extends TextType
 
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {

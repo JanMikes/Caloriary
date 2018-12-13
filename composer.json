@@ -41,7 +41,8 @@
         "mockery/mockery": "^1.2",
         "league/factory-muffin": "^3.0",
         "league/factory-muffin-faker": "^2.0",
-        "symplify/easy-coding-standard": "^5.2"
+        "symplify/easy-coding-standard": "^5.2",
+        "phpstan/phpstan-strict-rules": "^0.10.1"
     },
     "autoload": {
         "psr-4": {
