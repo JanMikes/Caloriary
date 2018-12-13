@@ -8,10 +8,13 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 
 final class ResponseFormatter
 {
-    public function formatError(ResponseInterface $response, string $error, int $code = 400): ResponseInterface
+    /**
+     * @param string[]|string $errors
+     */
+    public function formatError(ResponseInterface $response, $errors, int $code = 400): ResponseInterface
     {
         return $response->withJson([
-            'error' => $error,
+            'errors' => is_array($errors) ? $errors : [$errors],
         ], $code);
     }
 }

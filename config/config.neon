@@ -78,7 +78,7 @@ services:
 	- Caloriary\Application\Action\DeleteCaloricRecordAction
 	- Caloriary\Infrastructure\Application\Response\ResponseFormatter
 	- Tuupola\Middleware\CorsMiddleware(%cors%)
-	- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
+	- Caloriary\Infrastructure\Application\Middleware\ValidateJsonSchemaMiddleware(%schemasMappings%)
 	- Caloriary\Infrastructure\Authentication\Repository\DoctrineUsers(..., @orm.entityManager::getRepository(Caloriary\Authentication\User))
 	- Caloriary\Infrastructure\Authentication\ReadModel\DoesEmailExistInRepository
 	- Caloriary\Infrastructure\Authentication\Token\JsonWebTokenFactory(%jwt.issuer%, %jwt.secret%, %jwt.validForSeconds%)
@@ -140,6 +140,15 @@ parameters:
 				- Caloriary\Authorization\Value\UserAction::CREATE_CALORIC_RECORD
 				- Caloriary\Authorization\Value\UserAction::LIST_CALORIC_RECORDS
 
+	schemasMappings:
+		Caloriary\Application\Action\LoginAction: %appDir%/../../json-schemas/login.json
+		Caloriary\Application\Action\RegisterUserAction: %appDir%/../../json-schemas/register.json
+		Caloriary\Application\Action\AddUserAction: %appDir%/../../json-schemas/add-user.json
+		Caloriary\Application\Action\EditUserAction: %appDir%/../../json-schemas/edit-user.json
+		Caloriary\Application\Action\AddCaloricRecordAction: %appDir%/../../json-schemas/add-caloric-record.json
+		Caloriary\Application\Action\AddCaloricRecordToSpecificUserAction: %appDir%/../../json-schemas/add-caloric-record.json
+		Caloriary\Application\Action\EditCaloricRecordAction: %appDir%/../../json-schemas/add-caloric-record.json
+
 
 	api:
 		handlers:
@@ -149,7 +158,7 @@ parameters:
 			phpError: Caloriary\Application\Handler\ApiErrorHandler
 
 		beforeRouteMiddlewares:
-			- Caloriary\Infrastructure\Application\Middleware\ValidJSONBodyMiddleware
+			- Caloriary\Infrastructure\Application\Middleware\ValidateJsonSchemaMiddleware
 
 		beforeRequestMiddlewares:
 			- Caloriary\Infrastructure\Application\Middleware\PopulateUserProviderMiddleware
