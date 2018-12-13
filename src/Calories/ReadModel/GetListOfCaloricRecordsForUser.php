@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Calories\ReadModel;
 
@@ -9,8 +11,8 @@ use Nette\Utils\Paginator;
 
 interface GetListOfCaloricRecordsForUser
 {
-	/**
-	 * @return CaloricRecord[]
-	 */
-	public function __invoke(User $user, Paginator $paginator, QueryFilters $filters): array;
+    /**
+     * @return CaloricRecord[]
+     */
+    public function __invoke(User $user, Paginator $paginator, QueryFilters $filters): array;
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Calories\DBAL\Type;
 
@@ -8,38 +10,38 @@ use Doctrine\DBAL\Types\IntegerType;
 
 final class DailyCaloriesLimitType extends IntegerType
 {
-	/**
-	 * @inheritdoc
-	 */
-	public function convertToPHPValue($value, AbstractPlatform $platform)
-	{
-		\assert(is_numeric($value));
+    /**
+     * @inheritdoc
+     */
+    public function convertToPHPValue($value, AbstractPlatform $platform)
+    {
+        \assert(is_numeric($value));
 
-		$value = (int) $value;
+        $value = (int) $value;
 
-		return DailyCaloriesLimit::fromInteger($value);
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function convertToDatabaseValue($value, AbstractPlatform $platform)
-	{
-		\assert($value instanceof DailyCaloriesLimit);
-
-		return parent::convertToDatabaseValue($value->toInteger(), $platform);
-	}
+        return DailyCaloriesLimit::fromInteger($value);
+    }
 
 
-	public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-	{
-		return true;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    {
+        \assert($value instanceof DailyCaloriesLimit);
+
+        return parent::convertToDatabaseValue($value->toInteger(), $platform);
+    }
 
 
-	public function getName(): string
-	{
-		return DailyCaloriesLimit::class;
-	}
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
+    {
+        return true;
+    }
+
+
+    public function getName(): string
+    {
+        return DailyCaloriesLimit::class;
+    }
 }

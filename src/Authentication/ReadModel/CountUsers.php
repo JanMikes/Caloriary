@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Authentication\ReadModel;
 
@@ -6,5 +8,5 @@ use Caloriary\Application\Filtering\QueryFilters;
 
 interface CountUsers
 {
-	public function __invoke(QueryFilters $filters): int;
+    public function __invoke(QueryFilters $filters): int;
 }

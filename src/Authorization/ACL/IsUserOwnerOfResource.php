@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Authorization\ACL;
 
@@ -7,5 +9,5 @@ use Caloriary\Authorization\Resource;
 
 interface IsUserOwnerOfResource
 {
-	public function __invoke(User $user, Resource $resource): bool;
+    public function __invoke(User $user, Resource $resource): bool;
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Authorization\ACL;
 
@@ -9,58 +11,58 @@ use Nette\Security\Permission;
 
 final class HasUserPermissionForAction implements CanUserPerformAction
 {
-	/**
-	 * @var Permission
-	 */
-	private $permission;
+    /**
+     * @var Permission
+     */
+    private $permission;
 
 
-	/**
-	 * @param string[][] $permittedActionsForUsers
-	 */
-	public function __construct(array $permittedActionsForUsers)
-	{
-		$this->permission = new Permission();
+    /**
+     * @param string[][] $permittedActionsForUsers
+     */
+    public function __construct(array $permittedActionsForUsers)
+    {
+        $this->permission = new Permission();
 
-		foreach ($permittedActionsForUsers as $role => $actions) {
-			foreach ($actions as $action) {
-				$this->allowActionForRole($action, $role);
-			}
-		}
-	}
-
-
-	public function __invoke(User $user, UserAction $action): bool
-	{
-		return $this->permission->isAllowed($user->role()->getValue(), $action->getValue());
-	}
+        foreach ($permittedActionsForUsers as $role => $actions) {
+            foreach ($actions as $action) {
+                $this->allowActionForRole($action, $role);
+            }
+        }
+    }
 
 
-	private function allowActionForRole(string $action, string $role): void
-	{
-		$this->addRoleIfNotExists($role);
-		$this->addActionIfNotExists($action);
-
-		$this->permission->allow($role, $action);
-	}
+    public function __invoke(User $user, UserAction $action): bool
+    {
+        return $this->permission->isAllowed($user->role()->getValue(), $action->getValue());
+    }
 
 
-	private function addRoleIfNotExists(string $role): void
-	{
-		if ($this->permission->hasRole($role)) {
-			return;
-		}
+    private function allowActionForRole(string $action, string $role): void
+    {
+        $this->addRoleIfNotExists($role);
+        $this->addActionIfNotExists($action);
 
-		$this->permission->addRole($role);
-	}
+        $this->permission->allow($role, $action);
+    }
 
 
-	private function addActionIfNotExists(string $action): void
-	{
-		if ($this->permission->hasResource($action)) {
-			return;
-		}
+    private function addRoleIfNotExists(string $role): void
+    {
+        if ($this->permission->hasRole($role)) {
+            return;
+        }
 
-		$this->permission->addResource($action);
-	}
+        $this->permission->addRole($role);
+    }
+
+
+    private function addActionIfNotExists(string $action): void
+    {
+        if ($this->permission->hasResource($action)) {
+            return;
+        }
+
+        $this->permission->addResource($action);
+    }
 }

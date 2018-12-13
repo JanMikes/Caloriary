@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Calories\Value;
 
@@ -8,45 +10,45 @@ use Ramsey\Uuid\UuidInterface;
 
 class CaloricRecordId
 {
-	/**
-	 * @var UuidInterface
-	 */
-	private $uuid;
+    /**
+     * @var UuidInterface
+     */
+    private $uuid;
 
 
-	/**
-	 * @throws \InvalidArgumentException
-	 */
-	public static function fromString(string $uuid): self
-	{
-		$instance = new self;
+    /**
+     * @throws \InvalidArgumentException
+     */
+    public static function fromString(string $uuid): self
+    {
+        $instance = new self();
 
-		try {
-			$instance->uuid = Uuid::fromString($uuid);
-		} catch (InvalidUuidStringException $e) {
-			throw new \InvalidArgumentException(sprintf(
-				"Invalid uuid '%s' provided",
-				$uuid
-			));
-		}
+        try {
+            $instance->uuid = Uuid::fromString($uuid);
+        } catch (InvalidUuidStringException $e) {
+            throw new \InvalidArgumentException(sprintf(
+                "Invalid uuid '%s' provided",
+                $uuid
+            ));
+        }
 
-		return $instance;
-	}
-
-
-	public function toString(): string
-	{
-		return $this->uuid->toString();
-	}
+        return $instance;
+    }
 
 
-	public function __toString(): string
-	{
-		return $this->toString();
-	}
+    public function toString(): string
+    {
+        return $this->uuid->toString();
+    }
 
 
-	private function __construct()
-	{
-	}
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+
+
+    private function __construct()
+    {
+    }
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -19,102 +21,95 @@ use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class AddCaloricRecordAction implements ActionHandler
 {
-	/**
-	 * @var CaloricRecords
-	 */
-	private $caloricRecords;
+    /**
+     * @var CaloricRecords
+     */
+    private $caloricRecords;
 
-	/**
-	 * @var CanUserPerformAction
-	 */
-	private $canUserPerformAction;
+    /**
+     * @var CanUserPerformAction
+     */
+    private $canUserPerformAction;
 
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var GetCaloriesForMeal
-	 */
-	private $getCaloriesForMeal;
+    /**
+     * @var GetCaloriesForMeal
+     */
+    private $getCaloriesForMeal;
 
-	/**
-	 * @var CaloricRecordResponseTransformer
-	 */
-	private $caloricRecordResponseTransformer;
+    /**
+     * @var CaloricRecordResponseTransformer
+     */
+    private $caloricRecordResponseTransformer;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		CaloricRecords $caloricRecords,
-		CanUserPerformAction $canUserPerformAction,
-		ResponseFormatter $responseFormatter,
-		GetCaloriesForMeal $getCaloriesForMeal,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
-		UserProvider $userProvider
-	)
-	{
-		$this->caloricRecords = $caloricRecords;
-		$this->canUserPerformAction = $canUserPerformAction;
-		$this->responseFormatter = $responseFormatter;
-		$this->getCaloriesForMeal = $getCaloriesForMeal;
-		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		$body = $request->getDecodedJsonFromBody();
+    public function __construct(
+        CaloricRecords $caloricRecords,
+        CanUserPerformAction $canUserPerformAction,
+        ResponseFormatter $responseFormatter,
+        GetCaloriesForMeal $getCaloriesForMeal,
+        CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+        UserProvider $userProvider
+    ) {
+        $this->caloricRecords = $caloricRecords;
+        $this->canUserPerformAction = $canUserPerformAction;
+        $this->responseFormatter = $responseFormatter;
+        $this->getCaloriesForMeal = $getCaloriesForMeal;
+        $this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+        $this->userProvider = $userProvider;
+    }
 
-		try {
-			$currentUser = $this->userProvider->currentUser();
-			$ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
 
-			if (! $ateAt instanceof \DateTimeImmutable) {
-				throw new \InvalidArgumentException('Invalid date provided!');
-			}
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        $body = $request->getDecodedJsonFromBody();
 
-			$meal = MealDescription::fromString($body->text ?? '');
+        try {
+            $currentUser = $this->userProvider->currentUser();
+            $ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
 
-			if (isset($body->calories)) {
-				$calories = Calories::fromInteger($body->calories);
-			} else {
-				$calories = $this->getCaloriesForMeal->__invoke($meal);
-			}
+            if (!$ateAt instanceof \DateTimeImmutable) {
+                throw new \InvalidArgumentException('Invalid date provided!');
+            }
 
-			$caloricRecord = CaloricRecord::create(
-				$this->caloricRecords->nextIdentity(),
-				$currentUser,
-				$calories,
-				$ateAt,
-				$meal,
-				$this->canUserPerformAction
-			);
+            $meal = MealDescription::fromString($body->text ?? '');
 
-			$this->caloricRecords->add($caloricRecord);
+            if (isset($body->calories)) {
+                $calories = Calories::fromInteger($body->calories);
+            } else {
+                $calories = $this->getCaloriesForMeal->__invoke($meal);
+            }
 
-			return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 201);
-		}
+            $caloricRecord = CaloricRecord::create(
+                $this->caloricRecords->nextIdentity(),
+                $currentUser,
+                $calories,
+                $ateAt,
+                $meal,
+                $this->canUserPerformAction
+            );
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            $this->caloricRecords->add($caloricRecord);
 
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-
-		catch (MealNotFound $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
-	}
+            return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 201);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        } catch (MealNotFound $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        }
+    }
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Calories\ReadModel;
 
@@ -13,36 +15,36 @@ use Nette\Utils\Paginator;
 
 final class DQLGetListOfCaloricRecordsForUser implements GetListOfCaloricRecordsForUser
 {
-	use DQLPagination;
-	use DQLFiltering;
+    use DQLPagination;
+    use DQLFiltering;
 
-	/**
-	 * @var EntityManagerInterface
-	 */
-	private $entityManager;
-
-
-	public function __construct(EntityManagerInterface $entityManager)
-	{
-		$this->entityManager = $entityManager;
-	}
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
 
 
-	/**
-	 * @return CaloricRecord[]
-	 */
-	public function __invoke(User $user, Paginator $paginator, QueryFilters $filters): array
-	{
-		$builder = $this->entityManager->createQueryBuilder()
-			->from(CaloricRecord::class, 'record')
-			->select('record')
-			->where('record.owner = :user')
-			->setParameter('user', $user)
-			->orderBy('record.ateAt', 'DESC');
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
 
-		$this->applyFiltersToQueryBuilder($builder, $filters);
-		$this->applyPaginationToQueryBuilder($builder, $paginator);
 
-		return $builder->getQuery()->getResult();
-	}
+    /**
+     * @return CaloricRecord[]
+     */
+    public function __invoke(User $user, Paginator $paginator, QueryFilters $filters): array
+    {
+        $builder = $this->entityManager->createQueryBuilder()
+            ->from(CaloricRecord::class, 'record')
+            ->select('record')
+            ->where('record.owner = :user')
+            ->setParameter('user', $user)
+            ->orderBy('record.ateAt', 'DESC');
+
+        $this->applyFiltersToQueryBuilder($builder, $filters);
+        $this->applyPaginationToQueryBuilder($builder, $paginator);
+
+        return $builder->getQuery()->getResult();
+    }
 }

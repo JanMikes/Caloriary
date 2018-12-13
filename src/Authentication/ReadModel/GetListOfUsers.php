@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Authentication\ReadModel;
 
@@ -8,8 +10,8 @@ use Nette\Utils\Paginator;
 
 interface GetListOfUsers
 {
-	/**
-	 * @return User[]
-	 */
-	public function __invoke(Paginator $paginator, QueryFilters $filters): array;
+    /**
+     * @return User[]
+     */
+    public function __invoke(Paginator $paginator, QueryFilters $filters): array;
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Calories\DBAL\Type;
 
@@ -8,36 +10,36 @@ use Doctrine\DBAL\Types\TextType;
 
 final class MealDescriptionType extends TextType
 {
-	/**
-	 * @inheritdoc
-	 */
-	public function convertToPHPValue($value, AbstractPlatform $platform)
-	{
-		\assert(is_string($value));
+    /**
+     * @inheritdoc
+     */
+    public function convertToPHPValue($value, AbstractPlatform $platform)
+    {
+        \assert(is_string($value));
 
-		return MealDescription::fromString($value);
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function convertToDatabaseValue($value, AbstractPlatform $platform)
-	{
-		\assert($value instanceof MealDescription);
-
-		return parent::convertToDatabaseValue($value->toString(), $platform);
-	}
+        return MealDescription::fromString($value);
+    }
 
 
-	public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-	{
-		return true;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    {
+        \assert($value instanceof MealDescription);
+
+        return parent::convertToDatabaseValue($value->toString(), $platform);
+    }
 
 
-	public function getName(): string
-	{
-		return MealDescription::class;
-	}
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
+    {
+        return true;
+    }
+
+
+    public function getName(): string
+    {
+        return MealDescription::class;
+    }
 }

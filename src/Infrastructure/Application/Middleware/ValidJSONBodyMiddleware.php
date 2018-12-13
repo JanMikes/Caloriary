@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Application\Middleware;
 
@@ -10,28 +12,28 @@ use Nette\Utils\JsonException;
 
 final class ValidJSONBodyMiddleware implements Middleware
 {
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
 
-	public function __construct(ResponseFormatter $responseFormatter)
-	{
-		$this->responseFormatter = $responseFormatter;
-	}
+    public function __construct(ResponseFormatter $responseFormatter)
+    {
+        $this->responseFormatter = $responseFormatter;
+    }
 
 
-	public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
-	{
-		if ((string) $request->getBody()) {
-			try {
-				$request->getDecodedJsonFromBody();
-			} catch (JsonException $e) {
-				return $this->responseFormatter->formatError($response, 'Request body is not valid JSON!');
-			}
-		}
+    public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
+    {
+        if ((string) $request->getBody()) {
+            try {
+                $request->getDecodedJsonFromBody();
+            } catch (JsonException $e) {
+                return $this->responseFormatter->formatError($response, 'Request body is not valid JSON!');
+            }
+        }
 
-		return $next($request, $response);
-	}
+        return $next($request, $response);
+    }
 }

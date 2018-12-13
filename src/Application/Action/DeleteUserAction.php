@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -16,74 +18,67 @@ use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class DeleteUserAction implements ActionHandler
 {
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var Users
-	 */
-	private $users;
+    /**
+     * @var Users
+     */
+    private $users;
 
-	/**
-	 * @var CanUserPerformAction
-	 */
-	private $canUserPerformAction;
+    /**
+     * @var CanUserPerformAction
+     */
+    private $canUserPerformAction;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		Users $users,
-		CanUserPerformAction $canUserPerformAction,
-		UserProvider $userProvider
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
-		$this->canUserPerformAction = $canUserPerformAction;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		try {
-			$currentUser = $this->userProvider->currentUser();
-			$user = $this->users->get(
-				EmailAddress::fromString($arguments['email'] ?? '')
-			);
-			$action = UserAction::get(UserAction::DELETE_USER);
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        Users $users,
+        CanUserPerformAction $canUserPerformAction,
+        UserProvider $userProvider
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->users = $users;
+        $this->canUserPerformAction = $canUserPerformAction;
+        $this->userProvider = $userProvider;
+    }
 
-			if (! $this->canUserPerformAction->__invoke($currentUser, $action)) {
-				throw new RestrictedAccess();
-			}
 
-			$this->users->remove($user);
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        try {
+            $currentUser = $this->userProvider->currentUser();
+            $user = $this->users->get(
+                EmailAddress::fromString($arguments['email'] ?? '')
+            );
+            $action = UserAction::get(UserAction::DELETE_USER);
 
-			return $response->withJson([
-				'success' => true,
-			], 200);
-		}
+            if (!$this->canUserPerformAction->__invoke($currentUser, $action)) {
+                throw new RestrictedAccess();
+            }
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            $this->users->remove($user);
 
-		catch (UserNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'User not found!', 404);
-		}
-
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-	}
+            return $response->withJson([
+                'success' => true,
+            ], 200);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (UserNotFound $e) {
+            return $this->responseFormatter->formatError($response, 'User not found!', 404);
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        }
+    }
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Authentication\ReadModel;
 
@@ -14,40 +16,40 @@ use Nette\Utils\Paginator;
 
 final class DQLGetListOfUsers implements GetListOfUsers
 {
-	use DQLFiltering;
-	use DQLPagination;
+    use DQLFiltering;
+    use DQLPagination;
 
-	/**
-	 * @var EntityManagerInterface
-	 */
-	private $entityManager;
-
-
-	public function __construct(EntityManagerInterface $entityManager)
-	{
-		$this->entityManager = $entityManager;
-	}
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
 
 
-	/**
-	 * @return User[]
-	 *
-	 * @throws QueryException
-	 */
-	public function __invoke(Paginator $paginator, QueryFilters $filters): array
-	{
-		$builder = $this->entityManager->createQueryBuilder()
-			->from(User::class, 'user')
-			->select('user');
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
 
-		$this->applyPaginationToQueryBuilder($builder, $paginator);
 
-		try {
-			$this->applyFiltersToQueryBuilder($builder, $filters);
+    /**
+     * @return User[]
+     *
+     * @throws QueryException
+     */
+    public function __invoke(Paginator $paginator, QueryFilters $filters): array
+    {
+        $builder = $this->entityManager->createQueryBuilder()
+            ->from(User::class, 'user')
+            ->select('user');
 
-			return $builder->getQuery()->getResult();
-		} catch (QueryException $e) {
-			throw InvalidFilterQuery::fromQueryException($e);
-		}
-	}
+        $this->applyPaginationToQueryBuilder($builder, $paginator);
+
+        try {
+            $this->applyFiltersToQueryBuilder($builder, $filters);
+
+            return $builder->getQuery()->getResult();
+        } catch (QueryException $e) {
+            throw InvalidFilterQuery::fromQueryException($e);
+        }
+    }
 }

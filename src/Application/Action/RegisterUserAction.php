@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -16,66 +18,61 @@ use Caloriary\Infrastructure\Application\Response\UserResponseTransformer;
 
 final class RegisterUserAction implements ActionHandler
 {
-	/**
-	 * @var IsEmailRegistered
-	 */
-	private $isEmailRegistered;
+    /**
+     * @var IsEmailRegistered
+     */
+    private $isEmailRegistered;
 
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var Users
-	 */
-	private $users;
+    /**
+     * @var Users
+     */
+    private $users;
 
-	/**
-	 * @var UserResponseTransformer
-	 */
-	private $userResponseTransformer;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		IsEmailRegistered $isEmailRegistered,
-		Users $users,
-		UserResponseTransformer $userResponseTransformer
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->isEmailRegistered = $isEmailRegistered;
-		$this->users = $users;
-		$this->userResponseTransformer = $userResponseTransformer;
-	}
+    /**
+     * @var UserResponseTransformer
+     */
+    private $userResponseTransformer;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		$body = $request->getDecodedJsonFromBody();
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        IsEmailRegistered $isEmailRegistered,
+        Users $users,
+        UserResponseTransformer $userResponseTransformer
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->isEmailRegistered = $isEmailRegistered;
+        $this->users = $users;
+        $this->userResponseTransformer = $userResponseTransformer;
+    }
 
-		try {
-			$emailAddress = EmailAddress::fromString($body->email ?? '');
-			$password = ClearTextPassword::fromString($body->password ?? '');
-			$user = User::register($emailAddress, $password, $this->isEmailRegistered);
 
-			$this->users->add($user);
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        $body = $request->getDecodedJsonFromBody();
 
-			return $response->withJson($this->userResponseTransformer->toArray($user), 201);
-		}
+        try {
+            $emailAddress = EmailAddress::fromString($body->email ?? '');
+            $password = ClearTextPassword::fromString($body->password ?? '');
+            $user = User::register($emailAddress, $password, $this->isEmailRegistered);
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            $this->users->add($user);
 
-		catch (EmailAddressAlreadyRegistered $e) {
-			$message = sprintf('Email %s is already registered', $e->emailAddress()->toString());
+            return $response->withJson($this->userResponseTransformer->toArray($user), 201);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (EmailAddressAlreadyRegistered $e) {
+            $message = sprintf('Email %s is already registered', $e->emailAddress()->toString());
 
-			return $this->responseFormatter->formatError($response, $message);
-		}
-	}
+            return $this->responseFormatter->formatError($response, $message);
+        }
+    }
 }

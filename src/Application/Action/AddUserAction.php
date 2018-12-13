@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -20,93 +22,86 @@ use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class AddUserAction implements ActionHandler
 {
-	/**
-	 * @var IsEmailRegistered
-	 */
-	private $isEmailRegistered;
+    /**
+     * @var IsEmailRegistered
+     */
+    private $isEmailRegistered;
 
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var Users
-	 */
-	private $users;
+    /**
+     * @var Users
+     */
+    private $users;
 
-	/**
-	 * @var CanUserPerformAction
-	 */
-	private $canUserPerformAction;
+    /**
+     * @var CanUserPerformAction
+     */
+    private $canUserPerformAction;
 
-	/**
-	 * @var UserResponseTransformer
-	 */
-	private $userResponseTransformer;
+    /**
+     * @var UserResponseTransformer
+     */
+    private $userResponseTransformer;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		IsEmailRegistered $isEmailRegistered,
-		Users $users,
-		CanUserPerformAction $canUserPerformAction,
-		UserResponseTransformer $userResponseTransformer,
-		UserProvider $userProvider
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->isEmailRegistered = $isEmailRegistered;
-		$this->users = $users;
-		$this->canUserPerformAction = $canUserPerformAction;
-		$this->userResponseTransformer = $userResponseTransformer;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		try {
-			$body = $request->getDecodedJsonFromBody();
-			$currentUser = $this->userProvider->currentUser();
-			$emailAddress = EmailAddress::fromString($body->email ?? '');
-			$password = ClearTextPassword::fromString($body->password ?? '');
-			$dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        IsEmailRegistered $isEmailRegistered,
+        Users $users,
+        CanUserPerformAction $canUserPerformAction,
+        UserResponseTransformer $userResponseTransformer,
+        UserProvider $userProvider
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->isEmailRegistered = $isEmailRegistered;
+        $this->users = $users;
+        $this->canUserPerformAction = $canUserPerformAction;
+        $this->userResponseTransformer = $userResponseTransformer;
+        $this->userProvider = $userProvider;
+    }
 
-			$user = User::createByAdmin(
-				$emailAddress,
-				$password,
-				$dailyLimit,
-				$currentUser,
-				$this->isEmailRegistered,
-				$this->canUserPerformAction
-			);
 
-			$this->users->add($user);
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        try {
+            $body = $request->getDecodedJsonFromBody();
+            $currentUser = $this->userProvider->currentUser();
+            $emailAddress = EmailAddress::fromString($body->email ?? '');
+            $password = ClearTextPassword::fromString($body->password ?? '');
+            $dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);
 
-			return $response->withJson($this->userResponseTransformer->toArray($user), 201);
-		}
+            $user = User::createByAdmin(
+                $emailAddress,
+                $password,
+                $dailyLimit,
+                $currentUser,
+                $this->isEmailRegistered,
+                $this->canUserPerformAction
+            );
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            $this->users->add($user);
 
-		catch (EmailAddressAlreadyRegistered $e) {
-			$message = sprintf('Email %s is already registered', $e->emailAddress()->toString());
+            return $response->withJson($this->userResponseTransformer->toArray($user), 201);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (EmailAddressAlreadyRegistered $e) {
+            $message = sprintf('Email %s is already registered', $e->emailAddress()->toString());
 
-			return $this->responseFormatter->formatError($response, $message);
-		}
-
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-	}
+            return $this->responseFormatter->formatError($response, $message);
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        }
+    }
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 use Nette\Configurator;
 use Tracy\Debugger;
@@ -13,7 +15,7 @@ $configurator->addConfig(__DIR__ . '/../../config/config.neon');
 
 $localConfig = __DIR__ . '/../../config/config.local.neon';
 if (is_file($localConfig)) {
-	$configurator->addConfig($localConfig);
+    $configurator->addConfig($localConfig);
 }
 
 $configurator->enableDebugger(__DIR__ . '/../../var/log');

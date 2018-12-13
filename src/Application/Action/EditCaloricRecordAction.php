@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -21,113 +23,104 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 final class EditCaloricRecordAction implements ActionHandler
 {
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var CaloricRecords
-	 */
-	private $caloricRecords;
+    /**
+     * @var CaloricRecords
+     */
+    private $caloricRecords;
 
-	/**
-	 * @var CanUserPerformActionOnResource
-	 */
-	private $canUserPerformActionOnResource;
+    /**
+     * @var CanUserPerformActionOnResource
+     */
+    private $canUserPerformActionOnResource;
 
-	/**
-	 * @var ObjectManager
-	 */
-	private $manager;
+    /**
+     * @var ObjectManager
+     */
+    private $manager;
 
-	/**
-	 * @var GetCaloriesForMeal
-	 */
-	private $getCaloriesForMeal;
+    /**
+     * @var GetCaloriesForMeal
+     */
+    private $getCaloriesForMeal;
 
-	/**
-	 * @var CaloricRecordResponseTransformer
-	 */
-	private $caloricRecordResponseTransformer;
+    /**
+     * @var CaloricRecordResponseTransformer
+     */
+    private $caloricRecordResponseTransformer;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		CaloricRecords $caloricRecords,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		ObjectManager $manager,
-		GetCaloriesForMeal $getCaloriesForMeal,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
-		UserProvider $userProvider
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->caloricRecords = $caloricRecords;
-		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
-		$this->manager = $manager;
-		$this->getCaloriesForMeal = $getCaloriesForMeal;
-		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		try {
-			$body = $request->getDecodedJsonFromBody();
-			$currentUser = $this->userProvider->currentUser();
-			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
-			$caloricRecord = $this->caloricRecords->get($recordId);
-			$ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        CaloricRecords $caloricRecords,
+        CanUserPerformActionOnResource $canUserPerformActionOnResource,
+        ObjectManager $manager,
+        GetCaloriesForMeal $getCaloriesForMeal,
+        CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+        UserProvider $userProvider
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->caloricRecords = $caloricRecords;
+        $this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
+        $this->manager = $manager;
+        $this->getCaloriesForMeal = $getCaloriesForMeal;
+        $this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+        $this->userProvider = $userProvider;
+    }
 
-			if (! $ateAt instanceof \DateTimeImmutable) {
-				throw new \InvalidArgumentException('Invalid date provided!');
-			}
 
-			$meal = MealDescription::fromString($body->text ?? '');
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        try {
+            $body = $request->getDecodedJsonFromBody();
+            $currentUser = $this->userProvider->currentUser();
+            $recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
+            $caloricRecord = $this->caloricRecords->get($recordId);
+            $ateAt = \DateTimeImmutable::createFromFormat('Y-m-d H:i', $body->date . ' ' . $body->time);
 
-			if (isset($body->calories)) {
-				$calories = Calories::fromInteger($body->calories);
-			} else {
-				$calories = $this->getCaloriesForMeal->__invoke($meal);
-			}
+            if (!$ateAt instanceof \DateTimeImmutable) {
+                throw new \InvalidArgumentException('Invalid date provided!');
+            }
 
-			$caloricRecord->edit(
-				$calories,
-				$ateAt,
-				$meal,
-				$currentUser,
-				$this->canUserPerformActionOnResource
-			);
+            $meal = MealDescription::fromString($body->text ?? '');
 
-			$this->manager->flush();
+            if (isset($body->calories)) {
+                $calories = Calories::fromInteger($body->calories);
+            } else {
+                $calories = $this->getCaloriesForMeal->__invoke($meal);
+            }
 
-			return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
-		}
+            $caloricRecord->edit(
+                $calories,
+                $ateAt,
+                $meal,
+                $currentUser,
+                $this->canUserPerformActionOnResource
+            );
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            $this->manager->flush();
 
-		catch (CaloricRecordNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'Caloric record not found!', 404);
-		}
-
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-
-		catch (MealNotFound $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
-	}
+            return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (CaloricRecordNotFound $e) {
+            return $this->responseFormatter->formatError($response, 'Caloric record not found!', 404);
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        } catch (MealNotFound $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        }
+    }
 }

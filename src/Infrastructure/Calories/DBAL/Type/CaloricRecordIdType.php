@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Calories\DBAL\Type;
 
@@ -8,36 +10,36 @@ use Doctrine\DBAL\Types\StringType;
 
 final class CaloricRecordIdType extends StringType
 {
-	/**
-	 * @inheritdoc
-	 */
-	public function convertToPHPValue($value, AbstractPlatform $platform)
-	{
-		\assert(is_string($value));
+    /**
+     * @inheritdoc
+     */
+    public function convertToPHPValue($value, AbstractPlatform $platform)
+    {
+        \assert(is_string($value));
 
-		return CaloricRecordId::fromString($value);
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function convertToDatabaseValue($value, AbstractPlatform $platform)
-	{
-		\assert($value instanceof CaloricRecordId);
-
-		return parent::convertToDatabaseValue($value->toString(), $platform);
-	}
+        return CaloricRecordId::fromString($value);
+    }
 
 
-	public function requiresSQLCommentHint(AbstractPlatform $platform): bool
-	{
-		return true;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    {
+        \assert($value instanceof CaloricRecordId);
+
+        return parent::convertToDatabaseValue($value->toString(), $platform);
+    }
 
 
-	public function getName(): string
-	{
-		return CaloricRecordId::class;
-	}
+    public function requiresSQLCommentHint(AbstractPlatform $platform): bool
+    {
+        return true;
+    }
+
+
+    public function getName(): string
+    {
+        return CaloricRecordId::class;
+    }
 }

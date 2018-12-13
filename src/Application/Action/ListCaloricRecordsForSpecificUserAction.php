@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -22,122 +24,115 @@ use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class ListCaloricRecordsForSpecificUserAction implements ActionHandler
 {
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var Users
-	 */
-	private $users;
+    /**
+     * @var Users
+     */
+    private $users;
 
-	/**
-	 * @var CanUserPerformAction
-	 */
-	private $canUserPerformAction;
+    /**
+     * @var CanUserPerformAction
+     */
+    private $canUserPerformAction;
 
-	/**
-	 * @var GetListOfCaloricRecordsForUser
-	 */
-	private $getListOfCaloricRecordsForUser;
+    /**
+     * @var GetListOfCaloricRecordsForUser
+     */
+    private $getListOfCaloricRecordsForUser;
 
-	/**
-	 * @var PaginatorFromRequestFactory
-	 */
-	private $paginatorFromRequestFactory;
+    /**
+     * @var PaginatorFromRequestFactory
+     */
+    private $paginatorFromRequestFactory;
 
-	/**
-	 * @var CountCaloricRecordsOfUser
-	 */
-	private $countCaloricRecordsOfUser;
+    /**
+     * @var CountCaloricRecordsOfUser
+     */
+    private $countCaloricRecordsOfUser;
 
-	/**
-	 * @var QueryFiltersFromRequestFactory
-	 */
-	private $queryFiltersFromRequestFactory;
+    /**
+     * @var QueryFiltersFromRequestFactory
+     */
+    private $queryFiltersFromRequestFactory;
 
-	/**
-	 * @var PaginatorResponseTransformer
-	 */
-	private $paginatorResponseTransformer;
+    /**
+     * @var PaginatorResponseTransformer
+     */
+    private $paginatorResponseTransformer;
 
-	/**
-	 * @var CaloricRecordResponseTransformer
-	 */
-	private $caloricRecordResponseTransformer;
+    /**
+     * @var CaloricRecordResponseTransformer
+     */
+    private $caloricRecordResponseTransformer;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		Users $users,
-		GetListOfCaloricRecordsForUser $getListOfCaloricRecordsForUser,
-		CanUserPerformAction $canUserPerformAction,
-		PaginatorFromRequestFactory $paginatorFromRequestFactory,
-		CountCaloricRecordsOfUser $countCaloricRecordsOfUser,
-		QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory,
-		PaginatorResponseTransformer $paginatorResponseTransformer,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
-		UserProvider $userProvider
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
-		$this->canUserPerformAction = $canUserPerformAction;
-		$this->getListOfCaloricRecordsForUser = $getListOfCaloricRecordsForUser;
-		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
-		$this->countCaloricRecordsOfUser = $countCaloricRecordsOfUser;
-		$this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
-		$this->paginatorResponseTransformer = $paginatorResponseTransformer;
-		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		try {
-			$currentUser = $this->userProvider->currentUser();
-			$user = $this->users->get(
-				EmailAddress::fromString($arguments['email'] ?? '')
-			);
-			$action = UserAction::get(UserAction::LIST_CALORIC_RECORDS_FOR_SPECIFIC_USER);
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        Users $users,
+        GetListOfCaloricRecordsForUser $getListOfCaloricRecordsForUser,
+        CanUserPerformAction $canUserPerformAction,
+        PaginatorFromRequestFactory $paginatorFromRequestFactory,
+        CountCaloricRecordsOfUser $countCaloricRecordsOfUser,
+        QueryFiltersFromRequestFactory $queryFiltersFromRequestFactory,
+        PaginatorResponseTransformer $paginatorResponseTransformer,
+        CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+        UserProvider $userProvider
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->users = $users;
+        $this->canUserPerformAction = $canUserPerformAction;
+        $this->getListOfCaloricRecordsForUser = $getListOfCaloricRecordsForUser;
+        $this->paginatorFromRequestFactory = $paginatorFromRequestFactory;
+        $this->countCaloricRecordsOfUser = $countCaloricRecordsOfUser;
+        $this->queryFiltersFromRequestFactory = $queryFiltersFromRequestFactory;
+        $this->paginatorResponseTransformer = $paginatorResponseTransformer;
+        $this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+        $this->userProvider = $userProvider;
+    }
 
-			if (! $this->canUserPerformAction->__invoke($currentUser, $action)) {
-				throw new RestrictedAccess();
-			}
 
-			$queryFilters = $this->queryFiltersFromRequestFactory->create($request);
-			$totalCaloricRecordsCount = $this->countCaloricRecordsOfUser->__invoke($user, $queryFilters);
-			$paginator = $this->paginatorFromRequestFactory->create($request, $totalCaloricRecordsCount);
-			$caloricRecords = $this->getListOfCaloricRecordsForUser->__invoke($user, $paginator, $queryFilters);
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        try {
+            $currentUser = $this->userProvider->currentUser();
+            $user = $this->users->get(
+                EmailAddress::fromString($arguments['email'] ?? '')
+            );
+            $action = UserAction::get(UserAction::LIST_CALORIC_RECORDS_FOR_SPECIFIC_USER);
 
-			return $response->withJson(
-				$this->paginatorResponseTransformer->toArray($paginator) + [
-					'results' => array_map([$this->caloricRecordResponseTransformer, 'toArray'], $caloricRecords)
-				],
-				200
-			);
-		}
+            if (!$this->canUserPerformAction->__invoke($currentUser, $action)) {
+                throw new RestrictedAccess();
+            }
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage(), 400);
-		}
+            $queryFilters = $this->queryFiltersFromRequestFactory->create($request);
+            $totalCaloricRecordsCount = $this->countCaloricRecordsOfUser->__invoke($user, $queryFilters);
+            $paginator = $this->paginatorFromRequestFactory->create($request, $totalCaloricRecordsCount);
+            $caloricRecords = $this->getListOfCaloricRecordsForUser->__invoke($user, $paginator, $queryFilters);
 
-		catch (UserNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'User not found!', 404);
-		}
-
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-	}
+            return $response->withJson(
+                $this->paginatorResponseTransformer->toArray($paginator) + [
+                    'results' => array_map([$this->caloricRecordResponseTransformer, 'toArray'], $caloricRecords)
+                ],
+                200
+            );
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage(), 400);
+        } catch (UserNotFound $e) {
+            return $this->responseFormatter->formatError($response, 'User not found!', 404);
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        }
+    }
 }

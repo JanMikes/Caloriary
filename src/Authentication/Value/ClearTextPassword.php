@@ -1,49 +1,51 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Authentication\Value;
 
 class ClearTextPassword
 {
-	/**
-	 * @var string
-	 */
-	private $password;
+    /**
+     * @var string
+     */
+    private $password;
 
 
-	/**
-	 * @throws \InvalidArgumentException
-	 */
-	public static function fromString(string $string): self
-	{
-		if (trim($string) === '') {
-			throw new \InvalidArgumentException('An empty password is not acceptable');
-		}
-		$instance = new self();
-		$instance->password = $string;
+    /**
+     * @throws \InvalidArgumentException
+     */
+    public static function fromString(string $string): self
+    {
+        if (trim($string) === '') {
+            throw new \InvalidArgumentException('An empty password is not acceptable');
+        }
+        $instance = new self();
+        $instance->password = $string;
 
-		return $instance;
-	}
-
-
-	public function makeHash(): PasswordHash
-	{
-		$hash = password_hash($this->password, \PASSWORD_DEFAULT);
-
-		if (\is_string($hash) === false) {
-			throw new \RuntimeException('Failed to create password hash');
-		}
-
-		return PasswordHash::fromString($hash);
-	}
+        return $instance;
+    }
 
 
-	public function matches(PasswordHash $hash): bool
-	{
-		return password_verify($this->password, $hash->toString());
-	}
+    public function makeHash(): PasswordHash
+    {
+        $hash = password_hash($this->password, \PASSWORD_DEFAULT);
+
+        if (\is_string($hash) === false) {
+            throw new \RuntimeException('Failed to create password hash');
+        }
+
+        return PasswordHash::fromString($hash);
+    }
 
 
-	private function __construct()
-	{
-	}
+    public function matches(PasswordHash $hash): bool
+    {
+        return password_verify($this->password, $hash->toString());
+    }
+
+
+    private function __construct()
+    {
+    }
 }

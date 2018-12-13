@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Authorization\ACL;
 
@@ -7,5 +9,5 @@ use Caloriary\Authorization\Value\UserAction;
 
 interface CanUserPerformAction
 {
-	public function __invoke(User $user, UserAction $action): bool;
+    public function __invoke(User $user, UserAction $action): bool;
 }

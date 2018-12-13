@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -18,93 +20,88 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 final class EditUserAction implements ActionHandler
 {
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var Users
-	 */
-	private $users;
+    /**
+     * @var Users
+     */
+    private $users;
 
-	/**
-	 * @var CanUserPerformActionOnResource
-	 */
-	private $canUserPerformActionOnResource;
+    /**
+     * @var CanUserPerformActionOnResource
+     */
+    private $canUserPerformActionOnResource;
 
-	/**
-	 * @var ObjectManager
-	 */
-	private $manager;
+    /**
+     * @var ObjectManager
+     */
+    private $manager;
 
-	/**
-	 * @var UserResponseTransformer
-	 */
-	private $userResponseTransformer;
+    /**
+     * @var UserResponseTransformer
+     */
+    private $userResponseTransformer;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		Users $users,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		ObjectManager $manager,
-		UserResponseTransformer $userResponseTransformer,
-		UserProvider $userProvider
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
-		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
-		$this->manager = $manager;
-		$this->userResponseTransformer = $userResponseTransformer;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		try {
-			$body = $request->getDecodedJsonFromBody();
-			$currentUser = $this->userProvider->currentUser();
-			$user = $this->users->get(
-				EmailAddress::fromString($arguments['email'] ?? '')
-			);
-			$dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        Users $users,
+        CanUserPerformActionOnResource $canUserPerformActionOnResource,
+        ObjectManager $manager,
+        UserResponseTransformer $userResponseTransformer,
+        UserProvider $userProvider
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->users = $users;
+        $this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
+        $this->manager = $manager;
+        $this->userResponseTransformer = $userResponseTransformer;
+        $this->userProvider = $userProvider;
+    }
 
-			$currentUser->editUser(
-				$user,
-				$dailyLimit,
-				$this->canUserPerformActionOnResource
-			);
 
-			if (isset($body->password)) {
-				$currentUser->changeUserPassword(
-					$user,
-					ClearTextPassword::fromString($body->password),
-					$this->canUserPerformActionOnResource
-				);
-			}
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        try {
+            $body = $request->getDecodedJsonFromBody();
+            $currentUser = $this->userProvider->currentUser();
+            $user = $this->users->get(
+                EmailAddress::fromString($arguments['email'] ?? '')
+            );
+            $dailyLimit = DailyCaloriesLimit::fromInteger($body->dailyLimit ?? 0);
 
-			$this->manager->flush();
+            $currentUser->editUser(
+                $user,
+                $dailyLimit,
+                $this->canUserPerformActionOnResource
+            );
 
-			return $response->withJson($this->userResponseTransformer->toArray($user), 200);
-		}
+            if (isset($body->password)) {
+                $currentUser->changeUserPassword(
+                    $user,
+                    ClearTextPassword::fromString($body->password),
+                    $this->canUserPerformActionOnResource
+                );
+            }
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            $this->manager->flush();
 
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-	}
+            return $response->withJson($this->userResponseTransformer->toArray($user), 200);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        }
+    }
 }

@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Authentication;
 
@@ -18,183 +20,176 @@ use Caloriary\Calories\Value\DailyCaloriesLimit;
 
 class User implements Resource
 {
-	/**
-	 * @var EmailAddress
-	 */
-	private $emailAddress;
+    /**
+     * @var EmailAddress
+     */
+    private $emailAddress;
 
-	/**
-	 * @var PasswordHash
-	 */
-	private $passwordHash;
+    /**
+     * @var PasswordHash
+     */
+    private $passwordHash;
 
-	/**
-	 * @var UserRole
-	 */
-	private $role;
+    /**
+     * @var UserRole
+     */
+    private $role;
 
-	/**
-	 * @var DailyCaloriesLimit
-	 */
-	private $dailyLimit;
-
-
-	public static function register(
-		EmailAddress $emailAddress,
-		ClearTextPassword $password,
-		IsEmailRegistered $isEmailRegistered
-	): self
-	{
-		if ($isEmailRegistered->__invoke($emailAddress)) {
-			throw new EmailAddressAlreadyRegistered($emailAddress);
-		}
-
-		return new self($emailAddress, $password->makeHash());
-	}
+    /**
+     * @var DailyCaloriesLimit
+     */
+    private $dailyLimit;
 
 
-	public static function createByAdmin(
-		EmailAddress $emailAddress,
-		ClearTextPassword $password,
-		DailyCaloriesLimit $dailyLimit,
-		User $editor,
-		IsEmailRegistered $isEmailRegistered,
-		CanUserPerformAction $canUserPerformAction
-	): self
-	{
-		$action = UserAction::get(UserAction::ADD_USER);
+    public static function register(
+        EmailAddress $emailAddress,
+        ClearTextPassword $password,
+        IsEmailRegistered $isEmailRegistered
+    ): self {
+        if ($isEmailRegistered->__invoke($emailAddress)) {
+            throw new EmailAddressAlreadyRegistered($emailAddress);
+        }
 
-		if (! $canUserPerformAction->__invoke($editor, $action)) {
-			throw new RestrictedAccess();
-		}
-
-		if ($isEmailRegistered->__invoke($emailAddress)) {
-			throw new EmailAddressAlreadyRegistered($emailAddress);
-		}
-
-		$user = new self($emailAddress, $password->makeHash());
-
-		$user->dailyLimit = $dailyLimit;
-
-		return $user;
-	}
+        return new self($emailAddress, $password->makeHash());
+    }
 
 
-	public function emailAddress(): EmailAddress
-	{
-		return $this->emailAddress;
-	}
+    public static function createByAdmin(
+        EmailAddress $emailAddress,
+        ClearTextPassword $password,
+        DailyCaloriesLimit $dailyLimit,
+        User $editor,
+        IsEmailRegistered $isEmailRegistered,
+        CanUserPerformAction $canUserPerformAction
+    ): self {
+        $action = UserAction::get(UserAction::ADD_USER);
+
+        if (!$canUserPerformAction->__invoke($editor, $action)) {
+            throw new RestrictedAccess();
+        }
+
+        if ($isEmailRegistered->__invoke($emailAddress)) {
+            throw new EmailAddressAlreadyRegistered($emailAddress);
+        }
+
+        $user = new self($emailAddress, $password->makeHash());
+
+        $user->dailyLimit = $dailyLimit;
+
+        return $user;
+    }
 
 
-	public function passwordHash(): PasswordHash
-	{
-		return $this->passwordHash;
-	}
+    public function emailAddress(): EmailAddress
+    {
+        return $this->emailAddress;
+    }
 
 
-	/**
-	 * @throws AuthenticationFailed
-	 */
-	public function authenticate(ClearTextPassword $password): void
-	{
-		if ($password->matches($this->passwordHash) === false) {
-			throw new AuthenticationFailed();
-		}
-	}
+    public function passwordHash(): PasswordHash
+    {
+        return $this->passwordHash;
+    }
 
 
-	/**
-	 * @throws RestrictedAccess
-	 */
-	public function editUser(
-		User $user,
-		DailyCaloriesLimit $dailyLimit,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource
-	): void
-	{
-		$action = UserAction::get(UserAction::EDIT_USER);
-
-		$this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
-
-		$user->dailyLimit = $dailyLimit;
-	}
+    /**
+     * @throws AuthenticationFailed
+     */
+    public function authenticate(ClearTextPassword $password): void
+    {
+        if ($password->matches($this->passwordHash) === false) {
+            throw new AuthenticationFailed();
+        }
+    }
 
 
-	/**
-	 * @throws RestrictedAccess
-	 */
-	public function changeUserPassword(
-		User $user,
-		ClearTextPassword $password,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource
-	): void
-	{
-		$action = UserAction::get(UserAction::CHANGE_USER_PASSWORD);
+    /**
+     * @throws RestrictedAccess
+     */
+    public function editUser(
+        User $user,
+        DailyCaloriesLimit $dailyLimit,
+        CanUserPerformActionOnResource $canUserPerformActionOnResource
+    ): void {
+        $action = UserAction::get(UserAction::EDIT_USER);
 
-		$this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
+        $this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
 
-		$user->passwordHash = $password->makeHash();
-	}
-
-
-	/**
-	 * @throws RestrictedAccess
-	 */
-	public function changeUserRole(
-		User $user,
-		UserRole $role,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource
-	): void
-	{
-		$action = UserAction::get(UserAction::CHANGE_USER_ROLE);
-
-		$this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
-
-		$this->role = $role;
-	}
+        $user->dailyLimit = $dailyLimit;
+    }
 
 
-	public function ownedBy(): User
-	{
-		return $this;
-	}
+    /**
+     * @throws RestrictedAccess
+     */
+    public function changeUserPassword(
+        User $user,
+        ClearTextPassword $password,
+        CanUserPerformActionOnResource $canUserPerformActionOnResource
+    ): void {
+        $action = UserAction::get(UserAction::CHANGE_USER_PASSWORD);
+
+        $this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
+
+        $user->passwordHash = $password->makeHash();
+    }
 
 
-	public function dailyLimit(): DailyCaloriesLimit
-	{
-		return $this->dailyLimit;
-	}
+    /**
+     * @throws RestrictedAccess
+     */
+    public function changeUserRole(
+        User $user,
+        UserRole $role,
+        CanUserPerformActionOnResource $canUserPerformActionOnResource
+    ): void {
+        $action = UserAction::get(UserAction::CHANGE_USER_ROLE);
+
+        $this->assertActionCanBePerformedOnResource($canUserPerformActionOnResource, $action, $user);
+
+        $this->role = $role;
+    }
 
 
-	public function role(): UserRole
-	{
-		return $this->role;
-	}
+    public function ownedBy(): User
+    {
+        return $this;
+    }
 
 
-	private function __construct(
-		EmailAddress $emailAddress,
-		PasswordHash $passwordHash
-	)
-	{
-		$this->emailAddress = $emailAddress;
-		$this->passwordHash = $passwordHash;
-		$this->role = UserRole::get(UserRole::USER);
-		$this->dailyLimit = DailyCaloriesLimit::createUnlimited();
-	}
+    public function dailyLimit(): DailyCaloriesLimit
+    {
+        return $this->dailyLimit;
+    }
 
 
-	/**
-	 * @throws RestrictedAccess
-	 */
-	private function assertActionCanBePerformedOnResource(
-		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		UserAction $action,
-		Resource $resource
-	): void
-	{
-		if (! $canUserPerformActionOnResource->__invoke($this, $action, $resource)) {
-			throw new RestrictedAccess();
-		}
-	}
+    public function role(): UserRole
+    {
+        return $this->role;
+    }
+
+
+    private function __construct(
+        EmailAddress $emailAddress,
+        PasswordHash $passwordHash
+    ) {
+        $this->emailAddress = $emailAddress;
+        $this->passwordHash = $passwordHash;
+        $this->role = UserRole::get(UserRole::USER);
+        $this->dailyLimit = DailyCaloriesLimit::createUnlimited();
+    }
+
+
+    /**
+     * @throws RestrictedAccess
+     */
+    private function assertActionCanBePerformedOnResource(
+        CanUserPerformActionOnResource $canUserPerformActionOnResource,
+        UserAction $action,
+        Resource $resource
+    ): void {
+        if (!$canUserPerformActionOnResource->__invoke($this, $action, $resource)) {
+            throw new RestrictedAccess();
+        }
+    }
 }

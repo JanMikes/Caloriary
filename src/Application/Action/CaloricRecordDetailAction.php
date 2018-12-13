@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Action;
 
@@ -17,76 +19,69 @@ use Caloriary\Infrastructure\Authentication\UserProvider;
 
 final class CaloricRecordDetailAction implements ActionHandler
 {
-	/**
-	 * @var ResponseFormatter
-	 */
-	private $responseFormatter;
+    /**
+     * @var ResponseFormatter
+     */
+    private $responseFormatter;
 
-	/**
-	 * @var CaloricRecords
-	 */
-	private $caloricRecords;
+    /**
+     * @var CaloricRecords
+     */
+    private $caloricRecords;
 
-	/**
-	 * @var CanUserPerformActionOnResource
-	 */
-	private $canUserPerformActionOnResource;
+    /**
+     * @var CanUserPerformActionOnResource
+     */
+    private $canUserPerformActionOnResource;
 
-	/**
-	 * @var CaloricRecordResponseTransformer
-	 */
-	private $caloricRecordResponseTransformer;
+    /**
+     * @var CaloricRecordResponseTransformer
+     */
+    private $caloricRecordResponseTransformer;
 
-	/**
-	 * @var UserProvider
-	 */
-	private $userProvider;
-
-
-	public function __construct(
-		ResponseFormatter $responseFormatter,
-		CaloricRecords $caloricRecords,
-		CanUserPerformActionOnResource $canUserPerformActionOnResource,
-		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
-		UserProvider $userProvider
-	)
-	{
-		$this->responseFormatter = $responseFormatter;
-		$this->caloricRecords = $caloricRecords;
-		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
-		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
-		$this->userProvider = $userProvider;
-	}
+    /**
+     * @var UserProvider
+     */
+    private $userProvider;
 
 
-	/**
-	 * @param string[] $arguments
-	 */
-	public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
-	{
-		try {
-			$currentUser = $this->userProvider->currentUser();
-			$recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
-			$caloricRecord = $this->caloricRecords->get($recordId);
-			$action = UserAction::get(UserAction::CALORIC_RECORD_DETAIL);
+    public function __construct(
+        ResponseFormatter $responseFormatter,
+        CaloricRecords $caloricRecords,
+        CanUserPerformActionOnResource $canUserPerformActionOnResource,
+        CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
+        UserProvider $userProvider
+    ) {
+        $this->responseFormatter = $responseFormatter;
+        $this->caloricRecords = $caloricRecords;
+        $this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
+        $this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
+        $this->userProvider = $userProvider;
+    }
 
-			if (! $this->canUserPerformActionOnResource->__invoke($currentUser, $action, $caloricRecord)) {
-				throw new RestrictedAccess();
-			}
 
-			return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
-		}
+    /**
+     * @param string[] $arguments
+     */
+    public function __invoke(RequestInterface $request, ResponseInterface $response, array $arguments = []): ResponseInterface
+    {
+        try {
+            $currentUser = $this->userProvider->currentUser();
+            $recordId = CaloricRecordId::fromString($arguments['caloricRecordId'] ?? '');
+            $caloricRecord = $this->caloricRecords->get($recordId);
+            $action = UserAction::get(UserAction::CALORIC_RECORD_DETAIL);
 
-		catch (\InvalidArgumentException $e) {
-			return $this->responseFormatter->formatError($response, $e->getMessage());
-		}
+            if (!$this->canUserPerformActionOnResource->__invoke($currentUser, $action, $caloricRecord)) {
+                throw new RestrictedAccess();
+            }
 
-		catch (CaloricRecordNotFound $e) {
-			return $this->responseFormatter->formatError($response, 'Caloric record not found!', 404);
-		}
-
-		catch (RestrictedAccess $e) {
-			return $this->responseFormatter->formatError($response, 'Not allowed', 403);
-		}
-	}
+            return $response->withJson($this->caloricRecordResponseTransformer->toArray($caloricRecord), 200);
+        } catch (\InvalidArgumentException $e) {
+            return $this->responseFormatter->formatError($response, $e->getMessage());
+        } catch (CaloricRecordNotFound $e) {
+            return $this->responseFormatter->formatError($response, 'Caloric record not found!', 404);
+        } catch (RestrictedAccess $e) {
+            return $this->responseFormatter->formatError($response, 'Not allowed', 403);
+        }
+    }
 }

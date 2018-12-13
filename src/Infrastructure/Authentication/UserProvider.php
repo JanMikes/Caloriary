@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Infrastructure\Authentication;
 
@@ -9,35 +11,35 @@ use Caloriary\Authorization\Exception\RestrictedAccess;
 
 final class UserProvider
 {
-	/**
-	 * @var Users
-	 */
-	private $users;
+    /**
+     * @var Users
+     */
+    private $users;
 
-	/**
-	 * @var User|null
-	 */
-	private $currentUser;
-
-
-	public function __construct(Users $users)
-	{
-		$this->users = $users;
-	}
+    /**
+     * @var User|null
+     */
+    private $currentUser;
 
 
-	public function populateUser(EmailAddress $emailAddress): void
-	{
-		$this->currentUser = $this->users->get($emailAddress);
-	}
+    public function __construct(Users $users)
+    {
+        $this->users = $users;
+    }
 
 
-	public function currentUser(): User
-	{
-		if (!$this->currentUser) {
-			throw new RestrictedAccess('User is not logged in');
-		}
+    public function populateUser(EmailAddress $emailAddress): void
+    {
+        $this->currentUser = $this->users->get($emailAddress);
+    }
 
-		return $this->currentUser;
-	}
+
+    public function currentUser(): User
+    {
+        if (!$this->currentUser) {
+            throw new RestrictedAccess('User is not logged in');
+        }
+
+        return $this->currentUser;
+    }
 }

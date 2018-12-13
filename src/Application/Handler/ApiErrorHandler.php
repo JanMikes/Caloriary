@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Caloriary\Application\Handler;
 
@@ -9,26 +11,26 @@ use Tracy\ILogger;
 
 final class ApiErrorHandler implements ErrorHandler
 {
-	/**
-	 * @var ILogger
-	 */
-	private $logger;
+    /**
+     * @var ILogger
+     */
+    private $logger;
 
 
-	public function __construct(ILogger $logger)
-	{
-		$this->logger = $logger;
-	}
+    public function __construct(ILogger $logger)
+    {
+        $this->logger = $logger;
+    }
 
 
-	public function __invoke(RequestInterface $request, ResponseInterface $response, ?\Throwable $e = null): ResponseInterface
-	{
-		$error = $e !== null ? $e->getMessage() : 'Unknown error.';
-		$statusCode = 500;
-		$errorType = 'server_error';
+    public function __invoke(RequestInterface $request, ResponseInterface $response, ?\Throwable $e = null): ResponseInterface
+    {
+        $error = $e !== null ? $e->getMessage() : 'Unknown error.';
+        $statusCode = 500;
+        $errorType = 'server_error';
 
-		$this->logger->log($e, ILogger::EXCEPTION);
+        $this->logger->log($e, ILogger::EXCEPTION);
 
-		return $response->withJson(['error' => $errorType, 'message' => $error], $statusCode);
-	}
+        return $response->withJson(['error' => $errorType, 'message' => $error], $statusCode);
+    }
 }
