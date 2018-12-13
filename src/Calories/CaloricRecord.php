@@ -3,9 +3,9 @@
 namespace Caloriary\Calories;
 
 use Caloriary\Authentication\User;
-use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
+use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Resource;
 use Caloriary\Authorization\Value\UserAction;
 use Caloriary\Calories\Value\CaloricRecordId;

@@ -8,8 +8,6 @@ use BrandEmbassy\Slim\Response\ResponseInterface;
 use Caloriary\Application\Filtering\Exception\InvalidFilterQuery;
 use Caloriary\Authentication\ReadModel\CountUsers;
 use Caloriary\Authentication\ReadModel\GetListOfUsers;
-use Caloriary\Authentication\Repository\Users;
-use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
@@ -26,11 +24,6 @@ final class ListUsersAction implements ActionHandler
 	 * @var ResponseFormatter
 	 */
 	private $responseFormatter;
-
-	/**
-	 * @var Users
-	 */
-	private $users;
 
 	/**
 	 * @var CanUserPerformAction
@@ -75,7 +68,6 @@ final class ListUsersAction implements ActionHandler
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
-		Users $users,
 		GetListOfUsers $getListOfUsers,
 		CanUserPerformAction $canUserPerformAction,
 		PaginatorFromRequestFactory $paginatorFromRequestFactory,
@@ -87,7 +79,6 @@ final class ListUsersAction implements ActionHandler
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->getListOfUsers = $getListOfUsers;
 		$this->paginatorFromRequestFactory = $paginatorFromRequestFactory;

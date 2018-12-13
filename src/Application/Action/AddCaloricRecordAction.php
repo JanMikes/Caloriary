@@ -5,10 +5,8 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Caloriary\Authentication\Repository\Users;
-use Caloriary\Authentication\Value\EmailAddress;
-use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\ACL\CanUserPerformAction;
+use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Calories\CaloricRecord;
 use Caloriary\Calories\Exception\MealNotFound;
 use Caloriary\Calories\ReadModel\GetCaloriesForMeal;
@@ -25,11 +23,6 @@ final class AddCaloricRecordAction implements ActionHandler
 	 * @var CaloricRecords
 	 */
 	private $caloricRecords;
-
-	/**
-	 * @var Users
-	 */
-	private $users;
 
 	/**
 	 * @var CanUserPerformAction
@@ -59,7 +52,6 @@ final class AddCaloricRecordAction implements ActionHandler
 
 	public function __construct(
 		CaloricRecords $caloricRecords,
-		Users $users,
 		CanUserPerformAction $canUserPerformAction,
 		ResponseFormatter $responseFormatter,
 		GetCaloriesForMeal $getCaloriesForMeal,
@@ -68,7 +60,6 @@ final class AddCaloricRecordAction implements ActionHandler
 	)
 	{
 		$this->caloricRecords = $caloricRecords;
-		$this->users = $users;
 		$this->canUserPerformAction = $canUserPerformAction;
 		$this->responseFormatter = $responseFormatter;
 		$this->getCaloriesForMeal = $getCaloriesForMeal;

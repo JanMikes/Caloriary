@@ -5,8 +5,6 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Caloriary\Authentication\Repository\Users;
-use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
@@ -22,11 +20,6 @@ final class DeleteCaloricRecordAction implements ActionHandler
 	 * @var ResponseFormatter
 	 */
 	private $responseFormatter;
-
-	/**
-	 * @var Users
-	 */
-	private $users;
 
 	/**
 	 * @var CanUserPerformActionOnResource
@@ -46,14 +39,12 @@ final class DeleteCaloricRecordAction implements ActionHandler
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
-		Users $users,
 		CaloricRecords $caloricRecords,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
 		UserProvider $userProvider
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->caloricRecords = $caloricRecords;
 		$this->userProvider = $userProvider;

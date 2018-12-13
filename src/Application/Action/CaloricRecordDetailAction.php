@@ -5,8 +5,6 @@ namespace Caloriary\Application\Action;
 use BrandEmbassy\Slim\ActionHandler;
 use BrandEmbassy\Slim\Request\RequestInterface;
 use BrandEmbassy\Slim\Response\ResponseInterface;
-use Caloriary\Authentication\Repository\Users;
-use Caloriary\Authentication\Value\EmailAddress;
 use Caloriary\Authorization\ACL\CanUserPerformActionOnResource;
 use Caloriary\Authorization\Exception\RestrictedAccess;
 use Caloriary\Authorization\Value\UserAction;
@@ -23,11 +21,6 @@ final class CaloricRecordDetailAction implements ActionHandler
 	 * @var ResponseFormatter
 	 */
 	private $responseFormatter;
-
-	/**
-	 * @var Users
-	 */
-	private $users;
 
 	/**
 	 * @var CaloricRecords
@@ -52,7 +45,6 @@ final class CaloricRecordDetailAction implements ActionHandler
 
 	public function __construct(
 		ResponseFormatter $responseFormatter,
-		Users $users,
 		CaloricRecords $caloricRecords,
 		CanUserPerformActionOnResource $canUserPerformActionOnResource,
 		CaloricRecordResponseTransformer $caloricRecordResponseTransformer,
@@ -60,7 +52,6 @@ final class CaloricRecordDetailAction implements ActionHandler
 	)
 	{
 		$this->responseFormatter = $responseFormatter;
-		$this->users = $users;
 		$this->caloricRecords = $caloricRecords;
 		$this->canUserPerformActionOnResource = $canUserPerformActionOnResource;
 		$this->caloricRecordResponseTransformer = $caloricRecordResponseTransformer;
