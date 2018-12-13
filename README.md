@@ -28,4 +28,9 @@ These environment variables are supported:
 - `NUTRITIONIX_API_KEY` (required)
 
 ### Config file `config/config.local.neon`
-You can create this file and change anything. This is extremely useful for local development, etc disable logging. 
+You can create this file and change anything. This is extremely useful for local development, etc disable logging.
+
+## Code testing
+- PhpStan static analysis: `vendor/bin/phpstan analyse src packages --level=max`
+- PhpUnit Tests: `vendor/bin/phpunit tests` 
+- Coding Standard: `vendor/bin/ecs check src packages`

@@ -40,7 +40,8 @@
         "phpunit/phpunit": "^7.4",
         "mockery/mockery": "^1.2",
         "league/factory-muffin": "^3.0",
-        "league/factory-muffin-faker": "^2.0"
+        "league/factory-muffin-faker": "^2.0",
+        "symplify/easy-coding-standard": "^5.2"
     },
     "autoload": {
         "psr-4": {
