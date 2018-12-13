@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": ["string"]
+    },
+    "time": {
+      "type": ["string"]
+    },
+    "text": {
+      "type": ["string"]
+    },
+    "calories": {
+      "type": ["integer"]
+    }
+  },
+  "required": [
+    "date",
+    "time",
+    "text"
+  ]
+}
