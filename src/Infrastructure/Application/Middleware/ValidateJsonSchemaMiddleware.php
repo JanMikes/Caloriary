@@ -21,7 +21,7 @@ final class ValidateJsonSchemaMiddleware implements Middleware
     private $responseFormatter;
 
     /**
-     * @var array
+     * @var string[]
      */
     private $mappings;
 
@@ -39,27 +39,32 @@ final class ValidateJsonSchemaMiddleware implements Middleware
     public function __invoke(RequestInterface $request, ResponseInterface $response, callable $next): ResponseInterface
     {
         $body = (string) $request->getBody();
-        $route = $request->getAttribute('route');
 
         if ($body !== '') {
             try {
                 $data = $request->getDecodedJsonFromBody();
             } catch (JsonException $e) {
-                return $this->responseFormatter->formatError($response, 'Request body is not valid JSON!');
+                return $this->responseFormatter->formatError($response, 'Request body is not valid JSON');
             }
         }
 
-        if ($route instanceof Route) {
-            $callableClass = (string) $route->getCallable();
+        $route = $request->getAttribute('route');
 
-            if (isset($this->mappings[$callableClass])) {
+        if ($route instanceof Route) {
+            $callableClass = $route->getCallable();
+
+            if (is_string($callableClass) && isset($this->mappings[$callableClass])) {
+                if ($body === '') {
+                    return $this->responseFormatter->formatError($response, 'Empty request body given');
+                }
+
                 $schema = Json::decode(file_get_contents($this->mappings[$callableClass]));
 
                 $validator = new Validator();
                 $validator->coerce($data, $schema);
 
                 if (!$validator->isValid()) {
-                    $errors = array_map(function(array $error) {
+                    $errors = array_map(function (array $error) {
                         return $error['message'];
                     }, $validator->getErrors());
 
@@ -67,7 +72,6 @@ final class ValidateJsonSchemaMiddleware implements Middleware
                 }
             }
         }
-
 
         return $next($request, $response);
     }
