@@ -34,3 +34,11 @@ You can create this file and change anything. This is extremely useful for local
 - PhpStan static analysis: `vendor/bin/phpstan analyse src packages --level=max`
 - PhpUnit Tests: `vendor/bin/phpunit tests` 
 - Coding Standard: `vendor/bin/ecs check src packages`
+
+## Todos/ideas
+- [ ] HTTP (functional) tests for API with fixtures
+- [ ] CI config for Gitlab CI
+- [ ] Architecture: DTOs for requests, instead of working with stdClass
+- [ ] Architecture: decouple logic from actions - CommandBus (SimpleBus)
+- [ ] Console command for creating user and caloric entry (Symfony/Console)
+
